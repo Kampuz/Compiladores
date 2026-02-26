@@ -26,7 +26,7 @@ function getTokenType(token) {
     }
 }
 
-function rodar() {
+function tokenizar() {
     let input = lerTexto();
     let input_len = input.length;
     let line = 1;
@@ -35,7 +35,7 @@ function rodar() {
     let col_final = 1
     let token;
     let tokenType;
-    let output = ""
+    let output = "lexema | token | linha | col_inicial | col_final<br>"
 
     for (let i = 0; i < input_len; i++) {
         if (isNumber(input[i])) {
@@ -71,7 +71,7 @@ function rodar() {
             token = input[i];
             tokenType = getTokenType(token)
         }
-        output = `${output}${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}\n`
-        document.getElementById('token-output').value = output
+        output += `${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}<br>`;
+        document.getElementById('token-output').innerHTML = output;
     }
 }
