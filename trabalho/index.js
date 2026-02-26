@@ -1,6 +1,5 @@
 function lerTexto() {
     let code = document.getElementById('code-input').value
-    console.log(code)
     return code
 }
 
@@ -19,9 +18,9 @@ function getTokenType(token) {
         case '/':
             return "opDiv";
         case '(':
-            return "aPar";
+            return "aP";
         case ')':
-            return "fPar";
+            return "fP";
         default:
             return "Inválido"
     }
@@ -31,42 +30,48 @@ function rodar() {
     let input = lerTexto();
     let input_len = input.length;
     let line = 1;
+    let offset = 0;
     let col_inicial = 1;
     let col_final = 1
     let token;
     let tokenType;
+    let output = ""
 
-    console.log("lexema(lido)  token(representa) linha col_inicial col_final")
     for (let i = 0; i < input_len; i++) {
         if (isNumber(input[i])) {
             col_inicial = i + 1;
             col_final = col_inicial;
             tokenType = "nInt";
-            while(isNumber(input[col_final]) && col_final < input_len) {
+            while(col_final < input_len && isNumber(input[col_final])) {
                 col_final++;
             }
-            if (input[col_final] == '.' && isNumber(input[col_final + 1])) {
+            if (col_final + 1 < input_len &&
+                input[col_final] == '.' &&
+                isNumber(input[col_final + 1])) {
                 tokenType = "nReal";
                 col_final++;
-                while(isNumber(input[col_final]) && col_final < input_len) {
+                while(col_final < input_len && isNumber(input[col_final])) {
                     col_final++;
                 }
             }
             token = input.substring(col_inicial - 1, col_final);
             i = col_final - 1;
+            col_inicial = col_inicial - offset;
+            col_final = col_final - offset;
         } else {
             if (input[i] == ' ') {
-                break;
-            } else if (input[i] == '\n') {
-                line;
-                break;
+                continue;
+            } else if (input[i] === '\n') {
+                line++;
+                offset = i + 1;
+                continue;
             }
-            col_inicial = i+1
-            col_final = i+1
+            col_inicial = i+1 - offset
+            col_final = col_inicial
             token = input[i];
             tokenType = getTokenType(token)
         }
-        let output = `${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}`
-        console.log(output)
+        output = `${output}${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}\n`
+        document.getElementById('token-output').value = output
     }
 }
