@@ -1,4 +1,4 @@
-const TOKEN_TYPES ={
+const TOKENS_CALCULADORA ={
     '+': 'opSoma',
     '-': 'opSub',
     '*': 'opMul',
@@ -7,35 +7,17 @@ const TOKEN_TYPES ={
     ')': 'fP'
 }
 
-document.getElementById('file-input').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        document.getElementById('code-input').value = e.target.result;
-    };
-
-    reader.readAsText(file);
-});
-
-function cleanInput() {
-    const inputs = document.querySelectorAll('[id$="-input"]');
-    inputs.forEach(el => el.value = '');
-}
-
 function isNumber(number) {
     return ((number >= '0') && (number <= '9'))
 }
 
-function tokenize() {
+function calculadora() {
     const text = document.getElementById('code-input').value;
     processTokens(text);
 }
 
 function getTokenType(token) {
-    return TOKEN_TYPES[token] ?? 'inválido';
+    return TOKENS_CALCULADORA[token] ?? 'inválido';
 }
 
 function processTokens(input) {
