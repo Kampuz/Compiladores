@@ -16,7 +16,7 @@ function calculadora() {
     processTokens(text);
 }
 
-function getTokenType(token) {
+function getTokenTypeCalc(token) {
     return TOKENS_CALCULADORA[token] ?? 'inválido';
 }
 
@@ -61,9 +61,10 @@ function processTokens(input) {
             token = input.substring(start, i);
             i--;
             col_final = i - offset + 1;
+
         } else {
             token = input[i];
-            tokenType = getTokenType(token);
+            tokenType = getTokenTypeCalc(token);
         }
 
         output += `${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}<br>`;

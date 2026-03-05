@@ -1,8 +1,9 @@
 const TOKEN_TYPES ={
-    'program': 'palavra-reservada',
-    'procedure': 'palavra-reservada',
-    'begin': 'palavra-reservada',
-    'end': 'palavra-reservada',
+    'program': 'palavra-reservada-program',
+    'procedure': 'palavra-reservada-procedure',
+    'var': 'palavra-reservada-var',
+    'begin': 'palavra-reservada-begin',
+    'end': 'palavra-reservada-end',
     'int': 'tipo-inteiro',
     'boolean': 'tipo-boolean',
     ',': 'vírgula',
@@ -12,18 +13,31 @@ const TOKEN_TYPES ={
     '(': 'abre-parenteses',
     ')': 'fecha-parenteses',
     ':=': 'atribucão',
-    '+': 'opSoma',
-    '-': 'opSub',
-    '*': 'opMul',
-    '/': 'opDiv'
+    '+': 'operacao-soma',
+    '-': 'operacao-subtracao',
+    '*': 'operacao-multiplicacao',
+    '/': 'operacao-divisao',
+    '<>': 'operacao-diferente',
+    '>=': 'operacao-maior-igual',
+    '<=': 'operacao-menor-igual',
+    '<': 'operacao-menor',
+    '>': 'operacao-maior',
+    'not': 'operacao-negacao',
+    'or': 'operacao-inclusiva',
+    'and': 'operacao-conjuncao',
+    'if': 'palavra-reservada-if',
+    'then': 'palavra-reservada-then',
+    'else': 'palavra-reservada-else',
+    'while': 'palavra-reservada-while',
+    'do': 'palavra-reservada-do',
 }
 
 function isDigit(number) {
-    return ((number >= '0') && (number <= '9'))
+    return ((number >= '0') && (number <= '9'));
 }
 
 function isLetter(char) {
-    return (((char >= 'a') && (char <= 'z')) || ((char >= 'A') && (char <= 'Z')) || (char === '_'))
+    return (((char >= 'a') && (char <= 'z')) || ((char >= 'A') && (char <= 'Z')) || (char === '_'));
 }
 
 function tokenize() {
@@ -138,9 +152,18 @@ function lexicalAnalise(input) {
             i++;
             col_final = i - state.offset + 1;
 
+        }  else if ((input[i] === '<' && (input[i + 1] === '>' || input[i + 1] === '=') ||
+                    (input[i] === '>' && input[i + 1] === '='))) {
+            token = `${input[i]}${input[i + 1]}`;
+            tokenType = TOKEN_TYPES[token];
+            i++;
+            col_final = i - state.offset + 1;
+
         } else {
             token = input[i];
+            console.log(getTokenType(token))
             tokenType = getTokenType(token);
+            col_final = i - state.offset + 1;
         }
 
         output += `${token}  ${tokenType}  ${state.line}  ${col_inicial}  ${col_final}<br>`;
