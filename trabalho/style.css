@@ -38,7 +38,7 @@ h5 {
     font-weight: normal;
 }
 
-#token-output {
+#token-output, #error-output {
     font-family: monospace;
     background: white;
     border: 1px solid #ccc;
