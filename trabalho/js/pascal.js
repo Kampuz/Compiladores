@@ -33,6 +33,7 @@ const TOKEN_TYPES = {
 }
 
 const MAX_LEN = 10
+const MAX_FLOAT_LEN = 10
 
 function getTokenType(token) {
     return TOKEN_TYPES[token] ?? 'inválido';
@@ -75,6 +76,12 @@ function isValidIdentifier(token) {
     }
 
     return true;
+}
+
+function isTwoCharToken(firstChar, secondChar) {
+    return ((firstChar === ':' && secondChar === '=') ||
+            (firstChar === '<' && (secondChar === '>' || secondChar === '=')) ||
+            (firstChar === '>' && secondChar === '='))
 }
 
 function updateState(state, i) {
@@ -134,60 +141,55 @@ function lexicalAnalise(input) {
 
         let initialCol = updateCol(i, state.offset);
         let finalCol = initialCol
-        let token = '';
-        let tokenType = '';
+        let token = '', tokenType = ''
+
 
         if (isDigit(input[i])) {
-            let floatStart = i, start = i;
+            let floatStart = i, numberStart = i;
 
             while (i < input.length && isDigit(input[i])) i++;
 
             if (i < input.length && input[i] === '.' && isDigit(input[i + 1])) {
                 i++;
                 floatStart = i;
-                while (i < input.length && isDigit(input[i])) i++;
                 tokenType = "nReal";
+                while (i < input.length && isDigit(input[i])) i++;
             } else {
-            tokenType = "nInt";
+                tokenType = "nInt";
             }
 
-            token = input.substring(start, i);
+            let numberEnd = i;
             i--;
+
+            token = input.substring(numberStart, numberEnd);
             finalCol = updateCol(i, state.offset);
 
-            if ((tokenType === "nReal") && ((i + 1) - floatStart) > MAX_LEN) {
+            if ((tokenType === "nReal") && ((numberEnd - floatStart) > MAX_FLOAT_LEN)) {
                 state.error += `${token}  numero-real-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
             }
 
         } else if (isLetter(input[i])) {
-            let start = i;
+            let wordStart = i;
 
             while (i < input.length && (isLetter(input[i]) || isDigit(input[i]))) i++;
             
-            token = input.substring(start, i);
+            let wordEnd = i;
+            i--;
             
             if (TOKEN_TYPES[token]) {
                 tokenType = TOKEN_TYPES[token];
             } else {
-                if (isValidIdentifier(token))
-                    tokenType = "identificador-válido";
+                if (isValidIdentifier(token)) tokenType = "identificador-válido";
                 else tokenType = "identificador-inválido"
             }
             
-            i--;
+            token = input.substring(wordStart, wordEnd);
             finalCol = updateCol(i, state.offset);
-            if ((i - start) > MAX_LEN) {
+            if ((i - wordStart) > MAX_LEN) {
                 state.error += `${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
             }
-            
-        } else if (input[i] === ':' && input[i + 1] === '=') {
-            token = ':=';
-            tokenType = TOKEN_TYPES[token];
-            i++;
-            finalCol = updateCol(i, state.offset);
 
-        } else if ((input[i] === '<' && (input[i + 1] === '>' || input[i + 1] === '=') ||
-            (input[i] === '>' && input[i + 1] === '='))) {
+        } else if (isTwoCharToken(input[i], input[i + 1])) {
             token = `${input[i]}${input[i + 1]}`;
             tokenType = TOKEN_TYPES[token];
             i++;
@@ -195,7 +197,7 @@ function lexicalAnalise(input) {
 
         } else {
             token = input[i];
-            console.log(getTokenType(token))
+            // console.log(getTokenType(token))
             tokenType = getTokenType(token);
             finalCol = updateCol(i, state.offset);
 
@@ -205,8 +207,8 @@ function lexicalAnalise(input) {
         }
 
     state.output += `${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}<br>`;
-}
+    }
 
-document.getElementById('token-output').innerHTML = state.output;
-document.getElementById('error-output').innerHTML = state.error;
+    document.getElementById('token-output').innerHTML = state.output;
+    document.getElementById('error-output').innerHTML = state.error;
 }
