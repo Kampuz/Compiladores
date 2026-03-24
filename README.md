@@ -10,4 +10,6 @@ Membros:
 
 Trabalho:
 
-- [x] Analisador de tokens simples {[0-9], +, -, *, /, ., (,)} onde devem ser indentificados {nInt, nReal, opSoma, opSub, opMult, opDiv, aP, fP}
+- [x] Analisador Léxico de tokens simples {[0-9], +, -, *, /, ., (,)} onde devem ser indentificados {nInt, nReal, opSoma, opSub, opMult, opDiv, aP, fP}
+- [ ] Analisador Léxico para LALG
+- [ ] Rotinas para tratamento de erros léxicos
