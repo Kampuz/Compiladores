@@ -33,8 +33,8 @@ const TOKEN_TYPES = {
 }
 
 const MAX_LEN = 10
-const MAX_FLOAT_LEN = 10
 const MAX_INT_LEN = 10
+
 function getTokenType(token) {
     return TOKEN_TYPES[token] ?? 'inválido';
 }
@@ -128,10 +128,13 @@ function lexicalAnalise(input) {
         output: ""
     };
 
+    let errorState = []
+    
     for (let i = 0; i < input.length; i++) {
-
+        let errorFound = false
+        
         if (isSpace(input[i])) continue;
-
+        
         if (isNewLine(input[i])) {
             state = updateState(state, i)
             continue;
@@ -151,15 +154,8 @@ function lexicalAnalise(input) {
             let floatStart = i, numberStart = i;
 
             while (i < input.length && isDigit(input[i])) i++;
-
-            if (i < input.length && input[i] === '.' && isDigit(input[i + 1])) {
-                i++;
-                floatStart = i;
-                tokenType = "nReal";
-                while (i < input.length && isDigit(input[i])) i++;
-            } else {
-                tokenType = "nInt";
-            }
+            
+            tokenType = "nInt";
 
             let numberEnd = i;
             i--;
@@ -167,13 +163,12 @@ function lexicalAnalise(input) {
             token = input.substring(numberStart, numberEnd);
             finalCol = updateCol(i, state.offset);
 
-            if ((tokenType === "nInt") && ((numberEnd - numberStart) > MAX_INT_LEN)) {
-                state.error += `${token}  numero-inteiro-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+            if ((numberEnd - numberStart) > MAX_INT_LEN) {
+                error = `${token}  numero-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                errorFound = true
+                errorState.push(error);
                 token = input.substring(numberStart, numberStart + MAX_INT_LEN);
-            } else if ((tokenType === "nReal") && ((numberEnd - floatStart) > MAX_FLOAT_LEN)) {
-                state.error += `${token}  numero-real-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
-                token = input.substring(numberStart, floatStart + MAX_FLOAT_LEN);
-            }
+
         } else if (isLetter(input[i])) {
             let wordStart = i;
 
@@ -192,8 +187,11 @@ function lexicalAnalise(input) {
             
             token = input.substring(wordStart, wordEnd);
             finalCol = updateCol(i, state.offset);
+
             if ((i - wordStart) > MAX_LEN) {
-                state.error += `${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                error = `${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                errorFound = true
+                errorState.push(error)
                 token = input.substring(wordStart, wordStart + MAX_LEN);
             }
 
@@ -205,16 +203,19 @@ function lexicalAnalise(input) {
 
         } else {
             token = input[i];
-            // console.log(getTokenType(token))
             tokenType = getTokenType(token);
             finalCol = updateCol(i, state.offset);
 
             if (!isVocabulary(token)) {
-                state.error += `${token}  alfabeto-nao-identificado  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                error = `${token}  alfabeto-nao-identificado  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                errorFound = true
+                errorState.push(error)
             }
         }
 
-    state.output += `${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}<br>`;
+        if (errorFound === false) {
+            state.output += `${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}<br>`;
+        }
     }
 
     document.getElementById('token-output').innerHTML = state.output;
