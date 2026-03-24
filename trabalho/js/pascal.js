@@ -34,6 +34,10 @@ const TOKEN_TYPES = {
 
 const MAX_LEN = 10
 
+function getTokenType(token) {
+    return TOKEN_TYPES[token] ?? 'inválido';
+}
+
 function isVocabulary(symbol) {
     return (isDigit(symbol) || isLetter(symbol) || getTokenType(symbol) !== 'inválido');
 }
@@ -46,13 +50,21 @@ function isLetter(char) {
     return (((char >= 'a') && (char <= 'z')) || ((char >= 'A') && (char <= 'Z')) || (char === '_'));
 }
 
+function isSpace(char) {
+    return (char === ' ' || char === '\t')
+}
+
+function isNewLine(char) {
+    return (char === '\n')
+}
+
+function isCommentOpener(firstChar, secondChar) {
+    return firstChar === '{' || (firstChar === '/' && secondChar === '/')
+}
+
 function tokenize() {
     const text = document.getElementById('code-input').value;
     lexicalAnalise(text);
-}
-
-function getTokenType(token) {
-    return TOKEN_TYPES[token] ?? 'inválido';
 }
 
 function isValidIdentifier(token) {
@@ -65,29 +77,30 @@ function isValidIdentifier(token) {
     return true;
 }
 
+function updateState(state, i) {
+    state.line++;
+    state.offset = i + 1;
+
+    return state
+}
 
 function handleComment(input, i, state) {
     let firstChar = input[i];
     let secondChar = input[i + 1];
 
     if (firstChar === '{') {
-        i++;
-
         while (i < input.length && input[i] !== '}') {
-            if (input[i] === '\n') {
-                state.line++;
-                state.offset = i + 1;
+            if (isNewLine(i)) {
+                state = updateState(state, i)
             }
+
             i++;
         }
-        return i;
+
     } else if (firstChar === '/' && secondChar === '/') {
-        while (i < input.length && input[i] !== '\n') {
-            i++;
-        }
-        state.line++;
-        state.offset = i + 1;
-        return i;
+        while (i < input.length && !isNewLine(i)) i++;
+
+        state = updateState(state, i)
     }
 
     return i;
@@ -104,15 +117,14 @@ function lexicalAnalise(input) {
 
     for (let i = 0; i < input.length; i++) {
 
-        if (input[i] === ' ' || input[i] == '\t') continue;
+        if (isSpace(i)) continue;
 
-        else if (input[i] === '\n') {
-            state.line++;
-            state.offset = i + 1;
+        if (isNewLine(i)) {
+            state = updateState(state, i)
             continue;
         }
 
-        else if (input[i] === '{' || (input[i] === '/' && input[i + 1] === '/')) {
+        else if (isCommentOpener(input[i], input[i + 1])) {
             i = handleComment(input, i, state);
             continue;
         }
@@ -124,69 +136,71 @@ function lexicalAnalise(input) {
 
         if (isDigit(input[i])) {
             let start = i;
-            let float_start = 0;
+            let float_start = i;
+
             while (i < input.length && isDigit(input[i])) i++;
 
             if (i < input.length && input[i] === '.' && isDigit(input[i + 1])) {
                 i++;
-                float_start = i
+                float_start = i;
                 while (i < input.length && isDigit(input[i])) i++;
                 tokenType = "nReal";
             } else {
             tokenType = "nInt";
-        }
+            }
 
-        token = input.substring(start, i);
-        i--;
-        col_final = i - state.offset + 1;
-        if ((tokenType === "nReal") && ((i + 1) - float_start) > MAX_LEN) {
-            error += `${token}  numero-real-longo  ${state.line}  ${col_inicial}  ${col_final}<br>`
-        }
+            token = input.substring(start, i);
+            i--;
+            col_final = i - state.offset + 1;
 
-    } else if (isLetter(input[i])) {
-        let start = i;
+            if ((tokenType === "nReal") && ((i + 1) - float_start) > MAX_LEN) {
+                error += `${token}  numero-real-longo  ${state.line}  ${col_inicial}  ${col_final}<br>`
+            }
 
-        while (i < input.length && (isLetter(input[i]) || isDigit(input[i]))) i++;
-        
-        token = input.substring(start, i);
-        
-        if (TOKEN_TYPES[token]) {
+        } else if (isLetter(input[i])) {
+            let start = i;
+
+            while (i < input.length && (isLetter(input[i]) || isDigit(input[i]))) i++;
+            
+            token = input.substring(start, i);
+            
+            if (TOKEN_TYPES[token]) {
+                tokenType = TOKEN_TYPES[token];
+            } else {
+                if (isValidIdentifier(token))
+                    tokenType = "identificador-válido";
+                else tokenType = "identificador-inválido"
+            }
+            
+            i--;
+            col_final = i - state.offset + 1;
+            if ((i - start) > MAX_LEN) {
+                error += `${token}  identificador-longo  ${state.line}  ${col_inicial}  ${col_final}<br>`
+            }
+            
+        } else if (input[i] === ':' && input[i + 1] === '=') {
+            token = ':=';
             tokenType = TOKEN_TYPES[token];
+            i++;
+            col_final = i - state.offset + 1;
+
+        } else if ((input[i] === '<' && (input[i + 1] === '>' || input[i + 1] === '=') ||
+            (input[i] === '>' && input[i + 1] === '='))) {
+            token = `${input[i]}${input[i + 1]}`;
+            tokenType = TOKEN_TYPES[token];
+            i++;
+            col_final = i - state.offset + 1;
+
         } else {
-            if (isValidIdentifier(token))
-                tokenType = "identificador-válido";
-            else tokenType = "identificador-inválido"
-        }
-        
-        i--;
-        col_final = i - state.offset + 1;
-        if ((i - start) > MAX_LEN) {
-            error += `${token}  identificador-longo  ${state.line}  ${col_inicial}  ${col_final}<br>`
-        }
-        
-    } else if (input[i] === ':' && input[i + 1] === '=') {
-        token = ':=';
-        tokenType = TOKEN_TYPES[token];
-        i++;
-        col_final = i - state.offset + 1;
+            token = input[i];
+            console.log(getTokenType(token))
+            tokenType = getTokenType(token);
+            col_final = i - state.offset + 1;
 
-    } else if ((input[i] === '<' && (input[i + 1] === '>' || input[i + 1] === '=') ||
-        (input[i] === '>' && input[i + 1] === '='))) {
-        token = `${input[i]}${input[i + 1]}`;
-        tokenType = TOKEN_TYPES[token];
-        i++;
-        col_final = i - state.offset + 1;
-
-    } else {
-        token = input[i];
-        console.log(getTokenType(token))
-        tokenType = getTokenType(token);
-        col_final = i - state.offset + 1;
-
-        if (!isVocabulary(token)) {
-            error += `${token}  alfabeto-nao-identificado  ${state.line}  ${col_inicial}  ${col_final}<br>`
+            if (!isVocabulary(token)) {
+                error += `${token}  alfabeto-nao-identificado  ${state.line}  ${col_inicial}  ${col_final}<br>`
+            }
         }
-    }
 
     output += `${token}  ${tokenType}  ${state.line}  ${col_inicial}  ${col_final}<br>`;
 }
