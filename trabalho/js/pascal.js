@@ -97,20 +97,23 @@ function updateCol(i, offset) {
     return i - offset + 1;
 }
 
-function handleComment(input, i, state) {
+function commentHandler(input, i, state) {
     let firstChar = input[i];
     let secondChar = input[i + 1];
 
     if (firstChar === '{') {
         while (i < input.length && input[i] !== '}') {
-            if (isNewLine(i)) state = updateState(state, i)
+            if (isNewLine(input[i])) state = updateState(state, i);
             
             i++;
         }
 
         if (i === input.length) {
-            state.error += `comentario-nao-finalizado<br>`
+            state.errors.push(`comentario-nao-finalizado`);
+            state.errorFound = true;
         }
+
+        i++;
 
     } else if (firstChar === '/' && secondChar === '/') {
         while (i < input.length && !isNewLine(input[i])) i++;
@@ -124,57 +127,56 @@ function lexicalAnalise(input) {
     let state = {
         line: 1,
         offset: 0,
-        error: "",
-        output: ""
+        errors: [],
+        errorFound: false,
+        output: []
     };
-
-    let errorState = []
     
     for (let i = 0; i < input.length; i++) {
-        let errorFound = false
+        state.errorFound = false
         
         if (isSpace(input[i])) continue;
         
         if (isNewLine(input[i])) {
-            state = updateState(state, i)
+            state = updateState(state, i);
             continue;
         }
 
-        else if (isCommentOpener(input[i], input[i + 1])) {
-            i = handleComment(input, i, state);
+        if (isCommentOpener(input[i], input[i + 1])) {
+            i = commentHandler(input, i, state);
             continue;
         }
 
         let initialCol = updateCol(i, state.offset);
-        let finalCol = initialCol
-        let token = '', tokenType = ''
+        let finalCol = initialCol;
+        let token = '', tokenType = '';
 
 
         if (isDigit(input[i])) {
-            let floatStart = i, numberStart = i;
+            let numberStart = i;
+            tokenType = "nInt";
 
             while (i < input.length && isDigit(input[i])) i++;
             
-            tokenType = "nInt";
-
             let numberEnd = i;
+
             i--;
-            
+        
             token = input.substring(numberStart, numberEnd);
             finalCol = updateCol(i, state.offset);
 
             if ((numberEnd - numberStart) > MAX_INT_LEN) {
-                error = `${token}  numero-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
-                errorFound = true
-                errorState.push(error);
+                state.errors.push(`${token}  numero-longo  ${state.line}  ${initialCol}  ${finalCol}`);
+                state.errorFound = true;
                 token = input.substring(numberStart, numberStart + MAX_INT_LEN);
-
+            }
         } else if (isLetter(input[i])) {
             let wordStart = i;
 
-            while (i < input.length && (isLetter(input[i]) || isDigit(input[i]))) i++;
+            while (i < input.length && isVocabulary(input[i])) i++;
             
             let wordEnd = i;
+
             i--;
 
             token = input.substring(wordStart, wordEnd);
@@ -189,9 +191,8 @@ function lexicalAnalise(input) {
             finalCol = updateCol(i, state.offset);
 
             if ((i - wordStart) > MAX_LEN) {
-                error = `${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
-                errorFound = true
-                errorState.push(error)
+                state.errors.push(`${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}`);
+                state.errorFound = true;
                 token = input.substring(wordStart, wordStart + MAX_LEN);
             }
 
@@ -207,17 +208,16 @@ function lexicalAnalise(input) {
             finalCol = updateCol(i, state.offset);
 
             if (!isVocabulary(token)) {
-                error = `${token}  alfabeto-nao-identificado  ${state.line}  ${initialCol}  ${finalCol}<br>`
-                errorFound = true
-                errorState.push(error)
+                state.errors.push(`${token}  alfabeto-nao-identificado  ${state.line}  ${initialCol}  ${finalCol}`);
+                state.errorFound = true
             }
         }
 
-        if (errorFound === false) {
-            state.output += `${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}<br>`;
+        if (state.errorFound === false) {
+            state.output.push(`${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}`);
         }
     }
 
-    document.getElementById('token-output').innerHTML = state.output;
-    document.getElementById('error-output').innerHTML = state.error;
+    document.getElementById('token-output').innerHTML = state.output.join('<br>');
+    document.getElementById('error-output').innerHTML = state.errors.join('<br>');
 }
