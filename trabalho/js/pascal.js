@@ -34,7 +34,7 @@ const TOKEN_TYPES = {
 
 const MAX_LEN = 10
 const MAX_FLOAT_LEN = 10
-
+const MAX_INT_LEN = 10
 function getTokenType(token) {
     return TOKEN_TYPES[token] ?? 'inválido';
 }
@@ -69,13 +69,15 @@ function tokenize() {
 }
 
 function isValidIdentifier(token) {
-    if (!isLetter(token[0])) return false;
+    if (!isLetter(token[0])){
+        return "identificador-inválido";
+    }
     
     for (let i = 1; i < token.length; i++) {
-        if (!isLetter(token[i]) && !isDigit(token[i])) return false;
+        if (!isLetter(token[i]) && !isDigit(token[i])) return "identificador-inválido"
     }
-
-    return true;
+    
+    return "identificador-válido"
 }
 
 function isTwoCharToken(firstChar, secondChar) {
@@ -101,16 +103,17 @@ function handleComment(input, i, state) {
 
     if (firstChar === '{') {
         while (i < input.length && input[i] !== '}') {
-            if (isNewLine(i)) {
-                state = updateState(state, i)
-            }
-
+            if (isNewLine(i)) state = updateState(state, i)
+            
             i++;
         }
 
-    } else if (firstChar === '/' && secondChar === '/') {
-        while (i < input.length && !isNewLine(i)) i++;
+        if (i === input.length) {
+            state.error += `comentario-nao-finalizado<br>`
+        }
 
+    } else if (firstChar === '/' && secondChar === '/') {
+        while (i < input.length && !isNewLine(input[i])) i++;
         state = updateState(state, i)
     }
 
@@ -160,14 +163,17 @@ function lexicalAnalise(input) {
 
             let numberEnd = i;
             i--;
-
+            
             token = input.substring(numberStart, numberEnd);
             finalCol = updateCol(i, state.offset);
 
-            if ((tokenType === "nReal") && ((numberEnd - floatStart) > MAX_FLOAT_LEN)) {
+            if ((tokenType === "nInt") && ((numberEnd - numberStart) > MAX_INT_LEN)) {
+                state.error += `${token}  numero-inteiro-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                token = input.substring(numberStart, numberStart + MAX_INT_LEN);
+            } else if ((tokenType === "nReal") && ((numberEnd - floatStart) > MAX_FLOAT_LEN)) {
                 state.error += `${token}  numero-real-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                token = input.substring(numberStart, floatStart + MAX_FLOAT_LEN);
             }
-
         } else if (isLetter(input[i])) {
             let wordStart = i;
 
@@ -175,18 +181,20 @@ function lexicalAnalise(input) {
             
             let wordEnd = i;
             i--;
+
+            token = input.substring(wordStart, wordEnd);
             
             if (TOKEN_TYPES[token]) {
                 tokenType = TOKEN_TYPES[token];
             } else {
-                if (isValidIdentifier(token)) tokenType = "identificador-válido";
-                else tokenType = "identificador-inválido"
+                tokenType = isValidIdentifier(token);
             }
             
             token = input.substring(wordStart, wordEnd);
             finalCol = updateCol(i, state.offset);
             if ((i - wordStart) > MAX_LEN) {
                 state.error += `${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}<br>`
+                token = input.substring(wordStart, wordStart + MAX_LEN);
             }
 
         } else if (isTwoCharToken(input[i], input[i + 1])) {
