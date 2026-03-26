@@ -16,6 +16,14 @@ function cleanInput() {
     inputs.forEach(el => el.value = '');
 }
 
+function cleanOutput(ids) {
+    ids.forEach(id => {
+        const table = document.getElementById(id);
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+    });
+}
 
 function tableOutput(output) {
     const table = document.getElementById('token-output');
