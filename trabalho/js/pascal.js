@@ -4,6 +4,23 @@ const TOKEN_TYPES = {
     'var': 'palavra-reservada-var',
     'begin': 'palavra-reservada-begin',
     'end': 'palavra-reservada-end',
+    'if': 'palavra-reservada-if',
+    'then': 'palavra-reservada-then',
+    'else': 'palavra-reservada-else',
+    'while': 'palavra-reservada-while',
+    'do': 'palavra-reservada-do',
+    '<>': 'operacao-diferente',
+    '<': 'operacao-menor',
+    '<=': 'operacao-menor-igual',
+    '>=': 'operacao-maior-igual',
+    '>': 'operacao-maior',
+    '+': 'operacao-soma',
+    '-': 'operacao-subtracao',
+    'or': 'operacao-inclusiva',
+    '*': 'operacao-multiplicacao',
+    'div': 'operacao-divisao',
+    'and': 'operacao-conjuncao',
+    'not': 'operacao-negacao',
     'int': 'tipo-inteiro',
     'boolean': 'tipo-boolean',
     ',': 'vírgula',
@@ -13,23 +30,6 @@ const TOKEN_TYPES = {
     '(': 'abre-parenteses',
     ')': 'fecha-parenteses',
     ':=': 'atribucao',
-    '+': 'operacao-soma',
-    '-': 'operacao-subtracao',
-    '*': 'operacao-multiplicacao',
-    '/': 'operacao-divisao',
-    '<>': 'operacao-diferente',
-    '>=': 'operacao-maior-igual',
-    '<=': 'operacao-menor-igual',
-    '<': 'operacao-menor',
-    '>': 'operacao-maior',
-    'not': 'operacao-negacao',
-    'or': 'operacao-inclusiva',
-    'and': 'operacao-conjuncao',
-    'if': 'palavra-reservada-if',
-    'then': 'palavra-reservada-then',
-    'else': 'palavra-reservada-else',
-    'while': 'palavra-reservada-while',
-    'do': 'palavra-reservada-do',
 }
 
 const MAX_LEN = 10
@@ -82,12 +82,6 @@ function commentHandler(input, i, state) {
     }
 
     return i;
-}
-
-function tokenize() {
-    cleanOutput(['token-output', 'error-output'])
-    const text = document.getElementById('code-input').value;
-    lexicalAnalise(text);
 }
 
 function lexicalAnalise(input) {

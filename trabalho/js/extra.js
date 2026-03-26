@@ -58,3 +58,9 @@ function tableError(error) {
     cell4.textContent = error.initialCol;
     cell5.textContent = error.finalCol;
 }
+
+function tokenize() {
+    cleanOutput(['token-output', 'error-output'])
+    const text = document.getElementById('code-input').value;
+    lexicalAnalise(text);
+}
