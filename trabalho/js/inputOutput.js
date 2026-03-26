@@ -1,15 +1,23 @@
-document.getElementById('file-input').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (!file) return;
+function loadFileIntoInput(fileInputId, targetInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    const codeInput = document.getElementById(targetInputId);
 
-    const reader = new FileReader();
+    fileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    reader.onload = function (e) {
-        document.getElementById('code-input').value = e.target.result;
-    };
+        file.text().then(text => {
+            codeInput.value = text;
+        }).catch(err => {
+            console.error("Error reading file:", err);
+        });
+    });
+}
 
-    reader.readAsText(file);
-});
+function abrirArquivo(fileInputId, targetInputId) {
+    document.getElementById(fileInputId).click();
+    loadFileIntoInput(fileInputId, targetInputId)
+}
 
 function cleanInput() {
     const inputs = document.querySelectorAll('[id$="-input"]');

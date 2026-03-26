@@ -44,6 +44,14 @@ function updateError(state, token, errorType, initialCol, finalCol) {
     state.errorFound = true;
 }
 
+function updateOutput(output, token, tokenType, line, initialCol, finalCol) {
+    output.token = token;
+    output.tokenType = tokenType;
+    output.line = line;
+    output.initialCol = initialCol;
+    output.finalCol = finalCol;
+}
+
 function updateLine(state, i) {
     state.line++;
     state.offset = i + 1;
@@ -189,14 +197,11 @@ function lexicalAnalise(input) {
         }
 
         if (state.errorFound) {
+            console.log(state.error)
             tableError(state.error);
             continue;
         }
-        output.token = token
-        output.tokenType = tokenType
-        output.line = state.line
-        output.initialCol = initialCol
-        output.finalCol = finalCol
+        updateOutput(output, token, tokenType, state.line, initialCol, finalCol)
         console.log(output)
         tableOutput(output)
     }
