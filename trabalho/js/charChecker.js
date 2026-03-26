@@ -30,6 +30,7 @@ function isTwoCharToken(firstChar, secondChar) {
 }
 
 function isValidIdentifier(token) {
+    console.log(token)
     if (!isLetter(token[0])){
         return "identificador-inválido";
     }

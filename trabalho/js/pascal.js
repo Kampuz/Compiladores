@@ -44,11 +44,11 @@ function updateError(state, token, errorType, initialCol, finalCol) {
     state.errorFound = true;
 }
 
-function updateState(state, i) {
+function updateLine(state, i) {
     state.line++;
     state.offset = i + 1;
 
-    return state
+    return state;
 }
 
 function updateCol(i, offset) {
@@ -65,20 +65,20 @@ function commentHandler(input, i, state) {
 
     if (firstChar === '{') {
         while (i < input.length && input[i] !== '}') {
-            if (isNewLine(input[i])) state = updateState(state, i);
+            if (isNewLine(input[i])) state = updateLine(state, i);
             
             i++;
         }
 
         if (i === input.length) {
-            updateError(state, "",`comentario-nao-finalizado`, i, i)
+            updateError(state, "",`comentario-nao-finalizado`, i, i);
         }
 
         i++;
 
     } else if (firstChar === '/' && secondChar === '/') {
         while (i < input.length && !isNewLine(input[i])) i++;
-        state = updateState(state, i)
+        state = updateLine(state, i);
     }
 
     return i;
@@ -102,7 +102,7 @@ function lexicalAnalise(input) {
                 initialCol: 0,
                 finalCol: 0
             },
-            errorFound: false,
+            errorFound: false
         };
     
         let output = {
@@ -113,8 +113,6 @@ function lexicalAnalise(input) {
             finalCol: 0
         };
 
-        state.errorFound = false
-
         let initialCol = updateCol(i, state.offset);
 
         let finalCol = initialCol;
@@ -124,7 +122,7 @@ function lexicalAnalise(input) {
         if (isSpace(input[i])) continue;
         
         if (isNewLine(input[i])) {
-            state = updateState(state, i);
+            state = updateLine(state, i);
             continue;
         }
 
@@ -134,7 +132,9 @@ function lexicalAnalise(input) {
             if (state.errorFound) {
                 tableError(state.error)
             }
+
             continue
+
         } else if (isDigit(input[i])) {
             let numberStart = i;
             tokenType = "nInt";
@@ -161,15 +161,17 @@ function lexicalAnalise(input) {
 
             i--;
             
+            token = input.substring(wordStart, wordEnd);
+            finalCol = updateCol(i, state.offset);
+            
             if (TOKEN_TYPES[token]) {
                 tokenType = TOKEN_TYPES[token];
             } else {
                 tokenType = isValidIdentifier(token);
             }
-            
-            token = input.substring(wordStart, wordEnd);
-            finalCol = updateCol(i, state.offset);
 
+            getTokenType(token)
+            
             if ((wordEnd - wordStart) > MAX_LEN) {
                 updateError(state, token, "identificador-longo", initialCol, finalCol);
 
@@ -196,7 +198,6 @@ function lexicalAnalise(input) {
             tableError(state.error);
             continue;
         }
-        console.log(token)
         output.token = token
         output.tokenType = tokenType
         output.line = state.line

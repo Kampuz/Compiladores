@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a href="calculadora.html">Calculadora</a>
-    <input type="file" id="file-input" accept=".txt">
+    <a href="index.html">Voltar</a>
 
+    <input type="file" id="file-input" accept=".txt">
+    
     <textarea id="code-input"></textarea>
 
-    <button onclick="tokenize()">Analíse Léxica</button>
+    <button onclick="calculadora()">Calculadora</button>
     <button onclick="cleanInput()">Limpar</button>
 
     <table id="token-output">
@@ -25,21 +26,7 @@
         </tr>
     </table>
 
-    <table id="error-output">
-        <tr>
-            <th>Erro</th>
-            <th>Token</th>
-            <th>Linha</th>
-            <th>Coluna Inicial</th>
-            <th>Coluna Final</th>
-        </tr>
-        <tr>
-            
-        </tr>
-    </table>
-
-    <script src="js/charChecker.js"></script>
     <script src="js/extra.js"></script>
-    <script src="js/pascal.js"></script>
+    <script src="js/calculadora.js"></script>
 </body>
 </html>
