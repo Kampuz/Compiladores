@@ -35,8 +35,11 @@ function saveFile(inputId) {
 }
 
 function cleanInput() {
-    const inputs = document.querySelectorAll('[id$="-input"]');
-    inputs.forEach(el => el.value = '');
+    const confirmClear = confirm("Do you want to clear the inputs?");
+    if (confirmClear) {
+        const inputs = document.querySelectorAll('[id$="-input"]');
+        inputs.forEach(el => el.value = '');
+    }
 }
 
 function cleanOutput(ids) {
@@ -70,4 +73,9 @@ function tokenize(outputId, errorId, InputId) {
     cleanOutput([outputId, errorId])
     const text = document.getElementById(InputId).value;
     lexicalAnalise(text);
+}
+
+
+function goTo(url) {
+    window.location.href = url;
 }

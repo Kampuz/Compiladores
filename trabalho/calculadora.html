@@ -7,9 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a href="index.html">Voltar</a><br>
+    <button onclick="goTo('index.html')">Voltar</button><br>
 
-    <input type="file" class="input" placeholder="Selecionar arquivo" accept=".txt">
+    <button onclick="cleanInput()">Novo</button>
+    <button onclick="openFile('file-input', 'code-input')">Abrir</button>
+    <button onclick="saveFile('code-input')">Salvar</button>
+    
+    <input type="file" id="file-input" class="input" hidden accept=".txt">
     
     <textarea id="code-input"></textarea>
 

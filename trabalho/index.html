@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a href="calculadora.html">Calculadora</a><br>
-
+    <button onclick="goTo('calculadora.html')">Calculadora</button><br>
     
     <button onclick="cleanInput()">Novo</button>
     <button onclick="openFile('file-input', 'code-input')">Abrir</button>
     <button onclick="saveFile('code-input')">Salvar</button>
     
-    <input type="file" id="file-input" class="input" placeholder="Selecionar arquivo" accept=".txt">
+    <input type="file" id="file-input" class="input" hidden accept=".txt">
     <textarea id="code-input"></textarea>
 
     <button onclick="tokenize('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
