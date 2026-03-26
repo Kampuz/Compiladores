@@ -42,6 +42,8 @@ function updateError(state, token, errorType, initialCol, finalCol) {
     state.error.initialCol = initialCol;
     state.error.finalCol = finalCol;
     state.errorFound = true;
+    console.log(state.error)
+    tableError(state.error)
 }
 
 function updateOutput(output, token, tokenType, line, initialCol, finalCol) {
@@ -50,6 +52,9 @@ function updateOutput(output, token, tokenType, line, initialCol, finalCol) {
     output.line = line;
     output.initialCol = initialCol;
     output.finalCol = finalCol;
+
+    console.log(output)
+    tableOutput(output)
 }
 
 function updateLine(state, i) {
@@ -96,113 +101,92 @@ function lexicalAnalise(input) {
     let state = {
         line: 1,
         offset: 0,
-        error: {
-            token: "",
-            errorType: "",
-            line: 0,
-            initialCol: 0,
-            finalCol: 0
-        },
+        error: {},
         errorFound: false
     };
 
-    let output = {
-        token: "",
-        tokenType: "",
-        line: 0,
-        initialCol: 0,
-        finalCol: 0
-    };
+    let output = {};
+
     for (let i = 0; i < input.length; i++) {
 
-        let initialCol = updateCol(i, state.offset);
-
+        const initialCol = updateCol(i, state.offset);
         let finalCol = initialCol;
-
-        let token = '', tokenType = '';
+        const char = input[i]
         
-        if (isSpace(input[i])) continue;
-        
-        if (isNewLine(input[i])) {
+        if (isSpace(char)) continue;
+        if (isNewLine(char)) {
             state = updateLine(state, i);
             continue;
         }
 
-        if (isCommentOpener(input[i], input[i + 1])) {
+        if (isCommentOpener(char, input[i + 1])) {
             i = commentHandler(input, i, state);
-
-            if (state.errorFound) {
-                tableError(state.error)
-            }
-
-            continue
-
-        } else if (isDigit(input[i])) {
-            let numberStart = i;
-            tokenType = "nInt";
-
-            while (i < input.length && isDigit(input[i])) i++;
-            
-            let numberEnd = i;
-
-            i--;
-        
-            token = input.substring(numberStart, numberEnd);
-            finalCol = updateCol(i, state.offset);
-
-            if ((numberEnd - numberStart) > MAX_INT_LEN) {
-                updateError(state, token, "numero-longo", initialCol, finalCol);
-                token = input.substring(numberStart, numberStart + MAX_INT_LEN);
-            }
-        } else if (isLetter(input[i])) {
-            let wordStart = i;
-
-            while (i < input.length && isVocabulary(input[i])) i++;
-            
-            let wordEnd = i;
-
-            i--;
-            
-            token = input.substring(wordStart, wordEnd);
-            finalCol = updateCol(i, state.offset);
-            
-            if (TOKEN_TYPES[token]) {
-                tokenType = TOKEN_TYPES[token];
-            } else {
-                tokenType = isValidIdentifier(token);
-            }
-
-            getTokenType(token)
-            
-            if ((wordEnd - wordStart) > MAX_LEN) {
-                updateError(state, token, "identificador-longo", initialCol, finalCol);
-
-                token = input.substring(wordStart, wordStart + MAX_LEN);
-            }
-
-        } else if (isTwoCharToken(input[i], input[i + 1])) {
-            token = `${input[i]}${input[i + 1]}`;
-            tokenType = TOKEN_TYPES[token];
-            i++;
-            finalCol = updateCol(i, state.offset);
-
-        } else {
-            token = input[i];
-            tokenType = getTokenType(token);
-            finalCol = updateCol(i, state.offset);
-
-            if (tokenType === 'inválido') {
-                updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
-            }
-        }
-
-        if (state.errorFound) {
-            console.log(state.error)
-            tableError(state.error);
+            if (state.errorFound) tableError(state.error);
             continue;
         }
-        updateOutput(output, token, tokenType, state.line, initialCol, finalCol)
-        console.log(output)
-        tableOutput(output)
+        
+        if (isDigit(char)) {
+
+            const { token, finalIndex } = scanNumber(input, i, state);
+            finalCol = updateCol(finalIndex, state.offset);
+            i = finalIndex;
+            updateOutput(output, token, "nInt", state.line, initialCol, finalCol);
+            continue;
+        }
+        
+        if (isLetter(char)) {
+
+            const {token, finalIndex, tokenType} = scanWord(input, i);
+            finalCol = updateCol(finalIndex, state.offset);
+            i = finalIndex;
+            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            continue;
+        }
+        
+        if (isTwoCharToken(char, input[i + 1])) {
+            const token = char + input[i + 1];
+            const tokenType = getTokenType(token);
+            i++;
+            finalCol = updateCol(i, state.offset)
+            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            continue;
+        }
+        const token = char;
+        const tokenType = getTokenType(token);
+        finalCol = updateCol(i, state.offset);
+
+        if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
+        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
     }
+}
+
+function scanNumber(input, startIndex, state) {
+    let i = startIndex;
+
+    while (i < input.length && isDigit(input[i])) i++;
+
+    let token = input.substring(startIndex, i);
+
+    if (token.length > MAX_INT_LEN) {
+        updateError(state, token, "numero-longo", startIndex + 1, i);
+        token = token.substring(0, MAX_INT_LEN);
+    }
+
+    return { token, finalIndex: i - 1 };
+}
+
+function scanWord(input, startIndex) {
+    let i = startIndex
+    while (i < input.length && isVocabulary(input[i])) i++;
+
+    const token = input.substring(startIndex, i);
+
+    let tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
+
+    if (token.length > MAX_LEN) {
+        updateError(state, token, "identificador-longo", startIndex + 1, i);
+        token = token.substring(0, MAX_INT_LEN);
+    }
+
+    return { token, finalIndex: i - 1, tokenType };
 }
