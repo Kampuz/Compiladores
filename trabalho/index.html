@@ -11,13 +11,13 @@
 
     
     <button onclick="cleanInput()">Novo</button>
-    <button onclick="abrirArquivo('file-input', 'code-input')">Abrir</button>
-    <button onclick="salvar()">Salvar</button>
+    <button onclick="openFile('file-input', 'code-input')">Abrir</button>
+    <button onclick="saveFile('code-input')">Salvar</button>
     
     <input type="file" id="file-input" class="input" placeholder="Selecionar arquivo" accept=".txt">
     <textarea id="code-input"></textarea>
 
-    <button onclick="tokenize()">Analíse Léxica</button>
+    <button onclick="tokenize('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
 
     <table id="token-output">
         <tr>

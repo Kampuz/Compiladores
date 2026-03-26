@@ -14,9 +14,24 @@ function loadFileIntoInput(fileInputId, targetInputId) {
     });
 }
 
-function abrirArquivo(fileInputId, targetInputId) {
+function openFile(fileInputId, targetInputId) {
     document.getElementById(fileInputId).click();
     loadFileIntoInput(fileInputId, targetInputId)
+}
+
+function saveFile(inputId) {
+    const text = document.getElementById(inputId).value;
+    const fileName = prompt("Enter file name:", "file.txt");
+
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const link = document.createElement('a');
+    
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName.endsWith('.txt') ? fileName : fileName + '.txt';
+    
+    link.click();
+    URL.revokeObjectURL(link.href);
 }
 
 function cleanInput() {
@@ -44,27 +59,15 @@ function addRow(tableId, values) {
 }
 
 function tableOutput(output) {
-    addRow('token-output', [
-        output.token,
-        output.tokenType,
-        output.line,
-        output.initialCol,
-        output.finalCol
-    ]);
+    addRow('token-output', [output.token, output.tokenType, output.line, output.initialCol, output.finalCol]);
 }
 
 function tableError(error) {
-    addRow('error-output', [
-        error.errorType,
-        error.token,
-        error.line,
-        error.initialCol,
-        error.finalCol
-    ]);
+    addRow('error-output', [error.errorType, error.token, error.line, error.initialCol, error.finalCol]);
 }
 
-function tokenize() {
-    cleanOutput(['token-output', 'error-output'])
-    const text = document.getElementById('code-input').value;
+function tokenize(outputId, errorId, InputId) {
+    cleanOutput([outputId, errorId])
+    const text = document.getElementById(InputId).value;
     lexicalAnalise(text);
 }
