@@ -33,11 +33,6 @@ button:hover {
     background: #1c5fd1;
 }
 
-h5 {
-    margin: 6px 0;
-    font-weight: normal;
-}
-
 #token-output, #error-output {
     font-family: monospace;
     background: white;
