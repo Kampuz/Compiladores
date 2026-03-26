@@ -35,6 +35,15 @@ const TOKEN_TYPES = {
 const MAX_LEN = 10
 const MAX_INT_LEN = 10
 
+function updateError(state, token, errorType, initialCol, finalCol) {
+    state.error.token = token;
+    state.error.errorType = errorType;
+    state.error.line = state.line;
+    state.error.initialCol = initialCol;
+    state.error.finalCol = finalCol;
+    state.errorFound = true;
+}
+
 function getTokenType(token) {
     return TOKEN_TYPES[token] ?? 'inválido';
 }
@@ -63,9 +72,35 @@ function isCommentOpener(firstChar, secondChar) {
     return firstChar === '{' || (firstChar === '/' && secondChar === '/')
 }
 
-function tokenize() {
-    const text = document.getElementById('code-input').value;
-    lexicalAnalise(text);
+function commentHandler(input, i, state) {
+    let firstChar = input[i];
+    let secondChar = input[i + 1];
+
+    if (firstChar === '{') {
+        while (i < input.length && input[i] !== '}') {
+            if (isNewLine(input[i])) state = updateState(state, i);
+            
+            i++;
+        }
+
+        if (i === input.length) {
+            updateError(state, "",`comentario-nao-finalizado`, i, i)
+        }
+
+        i++;
+
+    } else if (firstChar === '/' && secondChar === '/') {
+        while (i < input.length && !isNewLine(input[i])) i++;
+        state = updateState(state, i)
+    }
+
+    return i;
+}
+
+function isTwoCharToken(firstChar, secondChar) {
+    return ((firstChar === ':' && secondChar === '=') ||
+            (firstChar === '<' && (secondChar === '>' || secondChar === '=')) ||
+            (firstChar === '>' && secondChar === '='))
 }
 
 function isValidIdentifier(token) {
@@ -80,12 +115,6 @@ function isValidIdentifier(token) {
     return "identificador-válido"
 }
 
-function isTwoCharToken(firstChar, secondChar) {
-    return ((firstChar === ':' && secondChar === '=') ||
-            (firstChar === '<' && (secondChar === '>' || secondChar === '=')) ||
-            (firstChar === '>' && secondChar === '='))
-}
-
 function updateState(state, i) {
     state.line++;
     state.offset = i + 1;
@@ -97,43 +126,38 @@ function updateCol(i, offset) {
     return i - offset + 1;
 }
 
-function commentHandler(input, i, state) {
-    let firstChar = input[i];
-    let secondChar = input[i + 1];
-
-    if (firstChar === '{') {
-        while (i < input.length && input[i] !== '}') {
-            if (isNewLine(input[i])) state = updateState(state, i);
-            
-            i++;
-        }
-
-        if (i === input.length) {
-            state.errors.push(`comentario-nao-finalizado`);
-            state.errorFound = true;
-        }
-
-        i++;
-
-    } else if (firstChar === '/' && secondChar === '/') {
-        while (i < input.length && !isNewLine(input[i])) i++;
-        state = updateState(state, i)
-    }
-
-    return i;
+function tokenize() {
+    const text = document.getElementById('code-input').value;
+    lexicalAnalise(text);
 }
 
 function lexicalAnalise(input) {
     let state = {
         line: 1,
         offset: 0,
-        errors: [],
+        error: {
+            token: "",
+            errorType: "",
+            line: 0,
+            initialCol: 0,
+            finalCol: 0
+        },
         errorFound: false,
-        output: []
+    };
+
+    let output = {
+        token: "",
+        tokenType: "",
+        line: 0,
+        initialCol: 0,
+        finalCol: 0
     };
     
     for (let i = 0; i < input.length; i++) {
         state.errorFound = false
+        let initialCol = updateCol(i, state.offset);
+        let finalCol = initialCol;
+        let token = '', tokenType = '';
         
         if (isSpace(input[i])) continue;
         
@@ -146,11 +170,6 @@ function lexicalAnalise(input) {
             i = commentHandler(input, i, state);
             continue;
         }
-
-        let initialCol = updateCol(i, state.offset);
-        let finalCol = initialCol;
-        let token = '', tokenType = '';
-
 
         if (isDigit(input[i])) {
             let numberStart = i;
@@ -166,8 +185,7 @@ function lexicalAnalise(input) {
             finalCol = updateCol(i, state.offset);
 
             if ((numberEnd - numberStart) > MAX_INT_LEN) {
-                state.errors.push(`${token}  numero-longo  ${state.line}  ${initialCol}  ${finalCol}`);
-                state.errorFound = true;
+                updateError(state, token, "numero-longo", initialCol, finalCol);
                 token = input.substring(numberStart, numberStart + MAX_INT_LEN);
             }
         } else if (isLetter(input[i])) {
@@ -178,8 +196,6 @@ function lexicalAnalise(input) {
             let wordEnd = i;
 
             i--;
-
-            token = input.substring(wordStart, wordEnd);
             
             if (TOKEN_TYPES[token]) {
                 tokenType = TOKEN_TYPES[token];
@@ -190,9 +206,9 @@ function lexicalAnalise(input) {
             token = input.substring(wordStart, wordEnd);
             finalCol = updateCol(i, state.offset);
 
-            if ((i - wordStart) > MAX_LEN) {
-                state.errors.push(`${token}  identificador-longo  ${state.line}  ${initialCol}  ${finalCol}`);
-                state.errorFound = true;
+            if ((wordEnd - wordStart) > MAX_LEN) {
+                updateError(state, token, "identificador-longo", initialCol, finalCol);
+
                 token = input.substring(wordStart, wordStart + MAX_LEN);
             }
 
@@ -208,16 +224,21 @@ function lexicalAnalise(input) {
             finalCol = updateCol(i, state.offset);
 
             if (!isVocabulary(token)) {
-                state.errors.push(`${token}  alfabeto-nao-identificado  ${state.line}  ${initialCol}  ${finalCol}`);
-                state.errorFound = true
+                updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
             }
         }
 
-        if (state.errorFound === false) {
-            state.output.push(`${token}  ${tokenType}  ${state.line}  ${initialCol}  ${finalCol}`);
+        if (state.errorFound) {
+            tableError(state.error);
+            continue;
         }
-    }
 
-    document.getElementById('token-output').innerHTML = state.output.join('<br>');
-    document.getElementById('error-output').innerHTML = state.errors.join('<br>');
+        output.token = token
+        output.tokenType = tokenType
+        output.line = state.line
+        output.initialCol = initialCol
+        output.finalCol = finalCol
+        console.log(output)
+        tableOutput(output)
+    }
 }
