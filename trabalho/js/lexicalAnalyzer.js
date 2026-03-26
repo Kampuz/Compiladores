@@ -191,7 +191,7 @@ function lexicalAnalise(input) {
             tokenType = getTokenType(token);
             finalCol = updateCol(i, state.offset);
 
-            if (!isVocabulary(token)) {
+            if (tokenType === 'inválido') {
                 updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
             }
         }

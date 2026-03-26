@@ -1,4 +1,4 @@
-function loadFileIntoInput(fileInputId, targetInputId) {
+function loadFile(fileInputId, targetInputId) {
     const fileInput = document.getElementById(fileInputId);
     const codeInput = document.getElementById(targetInputId);
 
@@ -16,7 +16,7 @@ function loadFileIntoInput(fileInputId, targetInputId) {
 
 function openFile(fileInputId, targetInputId) {
     document.getElementById(fileInputId).click();
-    loadFileIntoInput(fileInputId, targetInputId)
+    loadFile(fileInputId, targetInputId)
 }
 
 function saveFile(inputId) {
@@ -74,7 +74,6 @@ function tokenize(outputId, errorId, InputId) {
     const text = document.getElementById(InputId).value;
     lexicalAnalise(text);
 }
-
 
 function goTo(url) {
     window.location.href = url;

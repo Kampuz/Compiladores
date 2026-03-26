@@ -1,6 +1,9 @@
+function isNewLine(char) {
+    return (char === '\n')
+}
 
-function isVocabulary(symbol) {
-    return (isDigit(symbol) || isLetter(symbol) || getTokenType(symbol) !== 'inválido');
+function isSpace(char) {
+    return (char === ' ' || char === '\t')
 }
 
 function isDigit(number) {
@@ -10,13 +13,8 @@ function isDigit(number) {
 function isLetter(char) {
     return (((char >= 'a') && (char <= 'z')) || ((char >= 'A') && (char <= 'Z')) || (char === '_'));
 }
-
-function isSpace(char) {
-    return (char === ' ' || char === '\t')
-}
-
-function isNewLine(char) {
-    return (char === '\n')
+function isVocabulary(symbol) {
+    return (isDigit(symbol) || isLetter(symbol));
 }
 
 function isCommentOpener(firstChar, secondChar) {
