@@ -91,31 +91,34 @@ function tokenize() {
 }
 
 function lexicalAnalise(input) {
-    let state = {
-        line: 1,
-        offset: 0,
-        error: {
+    for (let i = 0; i < input.length; i++) {
+        let state = {
+            line: 1,
+            offset: 0,
+            error: {
+                token: "",
+                errorType: "",
+                line: 0,
+                initialCol: 0,
+                finalCol: 0
+            },
+            errorFound: false,
+        };
+    
+        let output = {
             token: "",
-            errorType: "",
+            tokenType: "",
             line: 0,
             initialCol: 0,
             finalCol: 0
-        },
-        errorFound: false,
-    };
+        };
 
-    let output = {
-        token: "",
-        tokenType: "",
-        line: 0,
-        initialCol: 0,
-        finalCol: 0
-    };
-    
-    for (let i = 0; i < input.length; i++) {
         state.errorFound = false
+
         let initialCol = updateCol(i, state.offset);
+
         let finalCol = initialCol;
+
         let token = '', tokenType = '';
         
         if (isSpace(input[i])) continue;
@@ -127,10 +130,12 @@ function lexicalAnalise(input) {
 
         if (isCommentOpener(input[i], input[i + 1])) {
             i = commentHandler(input, i, state);
-            continue;
-        }
 
-        if (isDigit(input[i])) {
+            if (state.errorFound) {
+                tableError(state.error)
+            }
+            continue
+        } else if (isDigit(input[i])) {
             let numberStart = i;
             tokenType = "nInt";
 
@@ -191,7 +196,7 @@ function lexicalAnalise(input) {
             tableError(state.error);
             continue;
         }
-
+        console.log(token)
         output.token = token
         output.tokenType = tokenType
         output.line = state.line
