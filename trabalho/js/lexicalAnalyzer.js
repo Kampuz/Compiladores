@@ -23,6 +23,8 @@ const TOKEN_TYPES = {
     'not': 'operacao-negacao',
     'int': 'tipo-inteiro',
     'boolean': 'tipo-boolean',
+    'true': 'valor-true',
+    'false': 'valor-false',
     ',': 'vírgula',
     ';': 'ponto-vírgula',
     ':': 'dois-pontos',
@@ -42,6 +44,7 @@ function updateError(state, token, errorType, initialCol, finalCol) {
     state.error.initialCol = initialCol;
     state.error.finalCol = finalCol;
     state.errorFound = true;
+
     console.log(state.error)
     tableError(state.error)
 }
@@ -83,9 +86,7 @@ function commentHandler(input, i, state) {
             i++;
         }
 
-        if (i === input.length) {
-            updateError(state, "",`comentario-nao-finalizado`, i, i);
-        }
+        if (i === input.length) updateError(state, "",`comentario-nao-finalizado`, i, i);
 
         i++;
 
