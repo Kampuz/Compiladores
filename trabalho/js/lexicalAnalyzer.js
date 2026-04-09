@@ -1,5 +1,3 @@
-import {TOKEN_TYPES, MAX_LEN, MAX_INT_LEN} from './tokens'
-
 function updateError(state, token, errorType, initialCol, finalCol) {
     state.error.token = token;
     state.error.errorType = errorType;
