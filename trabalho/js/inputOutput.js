@@ -69,10 +69,16 @@ function tableError(error) {
     addRow('error-output', [error.errorType, error.token, error.line, error.initialCol, error.finalCol]);
 }
 
-function tokenize(outputId, errorId, InputId) {
+function callLexicalAnalysis(outputId, errorId, InputId) {
     cleanOutput([outputId, errorId])
     const text = document.getElementById(InputId).value;
-    lexicalAnalise(text);
+    lexicalAnalysis(text);
+}
+
+function callSyntaticAnalysis(outputId, errorId, InputId) {
+    cleanOutput([outputId, errorId])
+    const text = document.getElementById(InputId).value;
+    syntaticAnalysis(text);
 }
 
 function goTo(url) {
