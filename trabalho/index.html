@@ -16,8 +16,8 @@
     <input type="file" id="file-input" class="input" hidden accept=".txt">
     <textarea id="code-input"></textarea>
 
-    <button onclick="tokenize('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
-    <button onclick="sintaticalAnalyze('token-output', 'error-output', 'code-input')">Analíse Sintática</button>
+    <button onclick="callLexicalAnalysis('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
+    <button onclick="callSyntaticAnalysis('token-output', 'error-output', 'code-input')">Analíse Sintática</button>
 
     <table id="token-output">
         <tr>
@@ -42,6 +42,6 @@
     <script src="js/checkers.js"></script>
     <script src="js/inputOutput.js"></script>
     <script src="js/lexicalAnalyzer.js"></script>
-    <script src="js/sintaticalAnalyzer.js"></script>
+    <script src="js/sintaticAnalyzer.js"></script>
 </body>
 </html>
