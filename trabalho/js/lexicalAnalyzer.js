@@ -1,41 +1,4 @@
-const TOKEN_TYPES = {
-    'program': 'palavra-reservada-program',
-    'procedure': 'palavra-reservada-procedure',
-    'var': 'palavra-reservada-var',
-    'begin': 'palavra-reservada-begin',
-    'end': 'palavra-reservada-end',
-    'if': 'palavra-reservada-if',
-    'then': 'palavra-reservada-then',
-    'else': 'palavra-reservada-else',
-    'while': 'palavra-reservada-while',
-    'do': 'palavra-reservada-do',
-    '<>': 'operacao-diferente',
-    '<': 'operacao-menor',
-    '<=': 'operacao-menor-igual',
-    '>=': 'operacao-maior-igual',
-    '>': 'operacao-maior',
-    '+': 'operacao-soma',
-    '-': 'operacao-subtracao',
-    'or': 'operacao-inclusiva',
-    '*': 'operacao-multiplicacao',
-    'div': 'operacao-divisao',
-    'and': 'operacao-conjuncao',
-    'not': 'operacao-negacao',
-    'int': 'tipo-inteiro',
-    'boolean': 'tipo-boolean',
-    'true': 'valor-true',
-    'false': 'valor-false',
-    ',': 'vírgula',
-    ';': 'ponto-vírgula',
-    ':': 'dois-pontos',
-    '.': 'ponto-final',
-    '(': 'abre-parenteses',
-    ')': 'fecha-parenteses',
-    ':=': 'atribucao',
-}
-
-const MAX_LEN = 10
-const MAX_INT_LEN = 10
+import {TOKEN_TYPES, MAX_LEN, MAX_INT_LEN} from './tokens'
 
 function updateError(state, token, errorType, initialCol, finalCol) {
     state.error.token = token;
@@ -82,7 +45,6 @@ function commentHandler(input, i, state) {
     if (firstChar === '{') {
         while (i < input.length && input[i] !== '}') {
             if (isNewLine(input[i])) state = updateLine(state, i);
-            
             i++;
         }
 
@@ -94,71 +56,7 @@ function commentHandler(input, i, state) {
         while (i < input.length && !isNewLine(input[i])) i++;
         state = updateLine(state, i);
     }
-
     return i;
-}
-
-function lexicalAnalise(input) {
-    let state = {
-        line: 1,
-        offset: 0,
-        error: {},
-        errorFound: false
-    };
-
-    let output = {};
-
-    for (let i = 0; i < input.length; i++) {
-
-        const initialCol = updateCol(i, state.offset);
-        let finalCol = initialCol;
-        const char = input[i]
-        
-        if (isSpace(char)) continue;
-        if (isNewLine(char)) {
-            state = updateLine(state, i);
-            continue;
-        }
-
-        if (isCommentOpener(char, input[i + 1])) {
-            i = commentHandler(input, i, state);
-            if (state.errorFound) tableError(state.error);
-            continue;
-        }
-        
-        if (isDigit(char)) {
-
-            const { token, finalIndex } = scanNumber(input, i, state);
-            finalCol = updateCol(finalIndex, state.offset);
-            i = finalIndex;
-            updateOutput(output, token, "nInt", state.line, initialCol, finalCol);
-            continue;
-        }
-        
-        if (isLetter(char)) {
-
-            const {token, finalIndex, tokenType} = scanWord(input, i);
-            finalCol = updateCol(finalIndex, state.offset);
-            i = finalIndex;
-            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
-            continue;
-        }
-        
-        if (isTwoCharToken(char, input[i + 1])) {
-            const token = char + input[i + 1];
-            const tokenType = getTokenType(token);
-            i++;
-            finalCol = updateCol(i, state.offset)
-            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
-            continue;
-        }
-        const token = char;
-        const tokenType = getTokenType(token);
-        finalCol = updateCol(i, state.offset);
-
-        if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
-        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
-    }
 }
 
 function scanNumber(input, startIndex, state) {
@@ -190,4 +88,65 @@ function scanWord(input, startIndex) {
     }
 
     return { token, finalIndex: i - 1, tokenType };
+}
+
+function lexicalAnalise(input) {
+    let state = {
+        line: 1,
+        offset: 0,
+        error: {},
+        errorFound: false
+    };
+
+    let output = {};
+
+    for (let i = 0; i < input.length; i++) {
+
+        const initialCol = updateCol(i, state.offset);
+        let finalCol = initialCol;
+        const char = input[i]
+        
+        if (isSpace(char)) continue;
+        if (isNewLine(char)) {
+            state = updateLine(state, i);
+            continue;
+        }
+
+        if (isCommentOpener(char, input[i + 1])) {
+            i = commentHandler(input, i, state);
+            if (state.errorFound) tableError(state.error);
+            continue;
+        }
+        
+        if (isDigit(char)) {
+            const { token, finalIndex } = scanNumber(input, i, state);
+            finalCol = updateCol(finalIndex, state.offset);
+            i = finalIndex;
+            updateOutput(output, token, "nInt", state.line, initialCol, finalCol);
+            continue;
+        }
+        
+        if (isLetter(char)) {
+            const {token, finalIndex, tokenType} = scanWord(input, i);
+            finalCol = updateCol(finalIndex, state.offset);
+            i = finalIndex;
+            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            continue;
+        }
+        
+        if (isTwoCharToken(char, input[i + 1])) {
+            const token = char + input[i + 1];
+            const tokenType = getTokenType(token);
+            i++;
+            finalCol = updateCol(i, state.offset)
+            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            continue;
+        }
+        const token = char;
+        const tokenType = getTokenType(token);
+        finalCol = updateCol(i, state.offset);
+
+        if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
+        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+    }
 }
