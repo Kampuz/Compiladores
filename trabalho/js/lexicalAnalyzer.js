@@ -66,26 +66,35 @@ function numberHandler(input, startIndex, state) {
 
     if (token.length > MAX_INT_LEN) {
         updateError(state, token, "numero-longo", startIndex + 1, i);
-        token = token.substring(0, MAX_INT_LEN);
+        token = token.substring(startIndex, MAX_INT_LEN);
     }
 
-    return { token, finalIndex: i - 1 };
+    return { token, finalIndex: i - 1, tokenType: "nint" };
 }
 
-function wordHandler(input, startIndex) {
-    let i = startIndex
+function wordHandler(input, startIndex, state) {
+    let i = startIndex;
+
     while (i < input.length && isVocabulary(input[i])) i++;
 
-    const token = input.substring(startIndex, i);
+    let token = input.substring(startIndex, i);
 
     let tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
 
     if (token.length > MAX_LEN) {
         updateError(state, token, "identificador-longo", startIndex + 1, i);
-        token = token.substring(0, MAX_INT_LEN);
+        token = token.substring(startIndex, MAX_LEN);
     }
 
     return { token, finalIndex: i - 1, tokenType };
+}
+
+function tokenHandler(input, startIndex, state, handler) {
+    const { token, finalIndex, tokenType } = handler(input, startIndex, state);
+    const finalCol = updateCol(finalIndex, state.offset);
+    const i = finalIndex;
+    updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+    return i;
 }
 
 function lexicalAnalysis(input) {
@@ -112,23 +121,16 @@ function lexicalAnalysis(input) {
 
         if (isCommentOpener(char, input[i + 1])) {
             i = commentHandler(input, i, state);
-            if (state.errorFound) tableError(state.error);
             continue;
         }
         
         if (isDigit(char)) {
-            const { token, finalIndex } = numberHandler(input, i, state);
-            finalCol = updateCol(finalIndex, state.offset);
-            i = finalIndex;
-            updateOutput(output, token, "nInt", state.line, initialCol, finalCol);
+            i = tokenHandler(input, i, state, numberHandler);
             continue;
         }
         
         if (isLetter(char)) {
-            const {token, finalIndex, tokenType} = wordHandler(input, i);
-            finalCol = updateCol(finalIndex, state.offset);
-            i = finalIndex;
-            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            i = tokenHandler(input, i, state, wordHandler);
             continue;
         }
         
@@ -140,6 +142,7 @@ function lexicalAnalysis(input) {
             updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
             continue;
         }
+
         const token = char;
         const tokenType = getTokenType(token);
         finalCol = updateCol(i, state.offset);
