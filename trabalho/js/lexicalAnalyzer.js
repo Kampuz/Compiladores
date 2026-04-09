@@ -59,7 +59,7 @@ function commentHandler(input, i, state) {
     return i;
 }
 
-function scanNumber(input, startIndex, state) {
+function numberHandler(input, startIndex, state) {
     let i = startIndex;
 
     while (i < input.length && isDigit(input[i])) i++;
@@ -74,7 +74,7 @@ function scanNumber(input, startIndex, state) {
     return { token, finalIndex: i - 1 };
 }
 
-function scanWord(input, startIndex) {
+function wordHandler(input, startIndex) {
     let i = startIndex
     while (i < input.length && isVocabulary(input[i])) i++;
 
@@ -90,7 +90,7 @@ function scanWord(input, startIndex) {
     return { token, finalIndex: i - 1, tokenType };
 }
 
-function lexicalAnalise(input) {
+function lexicalAnalysis(input) {
     let state = {
         line: 1,
         offset: 0,
@@ -119,7 +119,7 @@ function lexicalAnalise(input) {
         }
         
         if (isDigit(char)) {
-            const { token, finalIndex } = scanNumber(input, i, state);
+            const { token, finalIndex } = numberHandler(input, i, state);
             finalCol = updateCol(finalIndex, state.offset);
             i = finalIndex;
             updateOutput(output, token, "nInt", state.line, initialCol, finalCol);
@@ -127,7 +127,7 @@ function lexicalAnalise(input) {
         }
         
         if (isLetter(char)) {
-            const {token, finalIndex, tokenType} = scanWord(input, i);
+            const {token, finalIndex, tokenType} = wordHandler(input, i);
             finalCol = updateCol(finalIndex, state.offset);
             i = finalIndex;
             updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
