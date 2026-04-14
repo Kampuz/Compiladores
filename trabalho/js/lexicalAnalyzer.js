@@ -41,12 +41,16 @@ function commentHandler(input, i, state) {
     let secondChar = input[i + 1];
 
     if (firstChar === '{') {
+        const commentOppened = i;
         while (i < input.length && input[i] !== '}') {
+            
             if (isNewLine(input[i])) state = updateLine(state, i);
             i++;
         }
 
-        if (i === input.length) updateError(state, "",`comentario-nao-finalizado`, i, i);
+        if (i === input.length){
+            updateError(state, "",`comentario-nao-finalizado`, commentOppened, commentOppened);
+        }
 
         i++;
 
@@ -64,12 +68,15 @@ function numberHandler(input, startIndex, state) {
 
     let token = input.substring(startIndex, i);
 
+    let finalIndex = i - 1;
+
     if (token.length > MAX_INT_LEN) {
-        updateError(state, token, "numero-longo", startIndex + 1, i);
-        token = token.substring(startIndex, MAX_INT_LEN);
+        updateError(state, token, "numero-longo", updateCol(startIndex, state.offset), updateCol(i - 1, state.offset));
+        token = token.substring(0, MAX_INT_LEN);
+        finalIndex = startIndex  + MAX_INT_LEN;
     }
 
-    return { token, finalIndex: i - 1, tokenType: "nint" };
+    return { token, finalIndex, tokenType: "nint" , i: i - 1};
 }
 
 function wordHandler(input, startIndex, state) {
@@ -80,19 +87,30 @@ function wordHandler(input, startIndex, state) {
     let token = input.substring(startIndex, i);
 
     let tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
+    
+    let finalIndex = i - 1
 
     if (token.length > MAX_LEN) {
-        updateError(state, token, "identificador-longo", startIndex + 1, i);
-        token = token.substring(startIndex, MAX_LEN);
+        updateError(state, token, "identificador-longo", updateCol(startIndex, state.offset), updateCol(i - 1, state.offset));
+        token = token.substring(0, MAX_LEN);
+        finalIndex = startIndex + MAX_LEN;
     }
 
-    return { token, finalIndex: i - 1, tokenType };
+    return { token, finalIndex: finalIndex, tokenType, i: i - 1 };
 }
 
-function tokenHandler(input, startIndex, state, handler) {
-    const { token, finalIndex, tokenType } = handler(input, startIndex, state);
+function tokenHandler(input, startIndex, state, handler, output) {
+    const { token, finalIndex, tokenType, i } = handler(input, startIndex, state);
+    const initialCol = updateCol(startIndex, state.offset);
     const finalCol = updateCol(finalIndex, state.offset);
-    const i = finalIndex;
+    updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+    return i;
+}
+
+function twoCharHandler(token, i, state, initialCol, finalCol, output) {
+    const tokenType = getTokenType(token);
+    i++;
+    finalCol = updateCol(i, state.offset)
     updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
     return i;
 }
@@ -125,26 +143,23 @@ function lexicalAnalysis(input) {
         }
         
         if (isDigit(char)) {
-            i = tokenHandler(input, i, state, numberHandler);
+            i = tokenHandler(input, i, state, numberHandler, output);
             continue;
         }
         
         if (isLetter(char)) {
-            i = tokenHandler(input, i, state, wordHandler);
+            i = tokenHandler(input, i, state, wordHandler, output);
             continue;
         }
         
         if (isTwoCharToken(char, input[i + 1])) {
-            const token = char + input[i + 1];
-            const tokenType = getTokenType(token);
-            i++;
-            finalCol = updateCol(i, state.offset)
-            updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+            let token = input[i] + input[i + 1];
+            i = twoCharHandler(token, i, state, initialCol,finalCol, output);
             continue;
         }
 
-        const token = char;
-        const tokenType = getTokenType(token);
+        let token = char;
+        let tokenType = getTokenType(token);
         finalCol = updateCol(i, state.offset);
 
         if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
