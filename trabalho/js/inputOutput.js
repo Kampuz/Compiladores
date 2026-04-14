@@ -75,10 +75,10 @@ function callLexicalAnalysis(outputId, errorId, InputId) {
     lexicalAnalysis(text);
 }
 
-function callSyntaticAnalysis(outputId, errorId, InputId) {
+function callSintaticAnalysis(outputId, errorId, InputId) {
     cleanOutput([outputId, errorId])
     const text = document.getElementById(InputId).value;
-    syntaticAnalysis(text);
+    sintaticAnalysis(text);
 }
 
 function goTo(url) {
