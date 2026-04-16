@@ -33,7 +33,7 @@ button:hover {
     background: #1c5fd1;
 }
 
-#token-output, #error-output {
+#token-output, #error-output, #sintaticalErrorTable {
     font-family: monospace;
     background: white;
     border: 1px solid #ccc;

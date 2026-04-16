@@ -72,13 +72,15 @@ function tableError(error) {
 function callLexicalAnalysis(outputId, errorId, InputId) {
     cleanOutput([outputId, errorId])
     const text = document.getElementById(InputId).value;
-    lexicalAnalysis(text);
+    return lexicalAnalysis(text);
 }
 
-function callSintaticAnalysis(outputId, errorId, InputId) {
-    cleanOutput([outputId, errorId])
-    const text = document.getElementById(InputId).value;
-    sintaticAnalysis(text);
+function callSintaticAnalysis(outputId, errorId, input) {
+    cleanOutput(['sintaticalErrorTable'])
+    const { tokenList, errorFound } = callLexicalAnalysis(outputId, errorId, input);
+    if (errorFound) return;
+    
+    sintaticalAnalysis(tokenList);
 }
 
 function goTo(url) {

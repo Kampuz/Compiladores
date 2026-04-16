@@ -10,12 +10,14 @@ function updateError(state, token, errorType, initialCol, finalCol) {
     tableError(state.error)
 }
 
-function updateOutput(output, token, tokenType, line, initialCol, finalCol) {
+function updateOutput(output, token, tokenType, line, initialCol, finalCol, tokenList) {
     output.token = token;
     output.tokenType = tokenType;
     output.line = line;
     output.initialCol = initialCol;
     output.finalCol = finalCol;
+
+    tokenList.push({ token, tokenType, line, initialCol, finalCol });
 
     console.log(output)
     tableOutput(output)
@@ -52,6 +54,7 @@ function commentHandler(input, i, state) {
             updateError(state, "",`comentario-nao-finalizado`, commentOppened, commentOppened);
         }
 
+        if (isNewLine(input[i])) state = updateLine(state, i);
         i++;
 
     } else if (firstChar === '/' && secondChar === '/') {
@@ -99,19 +102,19 @@ function wordHandler(input, startIndex, state) {
     return { token, finalIndex: finalIndex, tokenType, i: i - 1 };
 }
 
-function tokenHandler(input, startIndex, state, handler, output) {
+function tokenHandler(input, startIndex, state, handler, output, tokenList) {
     const { token, finalIndex, tokenType, i } = handler(input, startIndex, state);
     const initialCol = updateCol(startIndex, state.offset);
     const finalCol = updateCol(finalIndex, state.offset);
-    updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+    updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
     return i;
 }
 
-function twoCharHandler(token, i, state, initialCol, finalCol, output) {
+function twoCharHandler(token, i, state, initialCol, finalCol, output, tokenList) {
     const tokenType = getTokenType(token);
     i++;
     finalCol = updateCol(i, state.offset)
-    updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+    updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
     return i;
 }
 
@@ -124,6 +127,7 @@ function lexicalAnalysis(input) {
     };
 
     let output = {};
+    const tokenList = [];
 
     for (let i = 0; i < input.length; i++) {
 
@@ -143,18 +147,18 @@ function lexicalAnalysis(input) {
         }
         
         if (isDigit(char)) {
-            i = tokenHandler(input, i, state, numberHandler, output);
+            i = tokenHandler(input, i, state, numberHandler, output, tokenList);
             continue;
         }
         
         if (isLetter(char)) {
-            i = tokenHandler(input, i, state, wordHandler, output);
+            i = tokenHandler(input, i, state, wordHandler, output, tokenList);
             continue;
         }
         
         if (isTwoCharToken(char, input[i + 1])) {
             let token = input[i] + input[i + 1];
-            i = twoCharHandler(token, i, state, initialCol,finalCol, output);
+            i = twoCharHandler(token, i, state, initialCol,finalCol, output, tokenList);
             continue;
         }
 
@@ -163,6 +167,8 @@ function lexicalAnalysis(input) {
         finalCol = updateCol(i, state.offset);
 
         if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
-        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol);
+        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
     }
+
+    return { tokenList, errorFound: state.errorFound };
 }

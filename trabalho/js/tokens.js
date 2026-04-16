@@ -17,7 +17,7 @@ const TOKEN_TYPES = {
     '>=': 'operacao-maior-igual',
     '>': 'operacao-maior',
     '=': 'operacao-igualdade',
-    '+': 'operacao-soma',
+    '+': 'operacao-adicao',
     '-': 'operacao-subtracao',
     'or': 'operacao-inclusiva',
     '*': 'operacao-multiplicacao',
@@ -34,7 +34,9 @@ const TOKEN_TYPES = {
     '.': 'ponto-final',
     '(': 'abre-parenteses',
     ')': 'fecha-parenteses',
-    ':=': 'atribucao',
+    '[': 'abre-colchetes',
+    ']': 'fecha-colchetes',
+    ':=': 'atribuicao',
 }
 
 const MAX_LEN = 10
