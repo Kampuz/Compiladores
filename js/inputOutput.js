@@ -44,12 +44,14 @@ function cleanInput() {
 }
 
 function cleanOutput(idArray) {
-    idArray.forEach(id => {
+    for (const id of idArray) {
         const table = document.getElementById(id);
+        if (!table) return;
+        
         while (table.rows.length > 1) {
             table.deleteRow(1);
         }
-    });
+    }
 }
 
 function addRow(tableId, values) {
