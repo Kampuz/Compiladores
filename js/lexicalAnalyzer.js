@@ -36,15 +36,13 @@ class Lexer {
         this.errors.push(error);
 
         console.error(error);
-        if (typeof tableError === 'function') tableError(error);
-    }
 
+    }
     addToken(token, tokenType, initialCol, finalCol) {
         const output = { token, tokenType, line: this.line, initialCol, finalCol }
         this.tokens.push(output);
 
-        console.error(output);
-        if (typeof tableOutput === 'function') tableOutput(error);
+        console.log(output);
     }
 
     lex() {
@@ -76,11 +74,11 @@ class Lexer {
 
             if (isTwoCharToken(char, this.peek())) {
                 const token = char + this.advance();
-                this.addToken(token, getTokenType(token), initialCol, this.currentCol - 1);
+                this.addToken(token, this.getTokenType(token), initialCol, this.currentCol - 1);
                 continue;
             }
 
-            const tokenType = getTokenType(char);
+            const tokenType = this.getTokenType(char);
             if (tokenType === 'inválido') {
                 this.reportError(char, "alfabeto-nao-identificado", initialCol, initialCol);
             } else {
@@ -105,7 +103,7 @@ class Lexer {
 
     handleLineComment() {
         while (!this.isAtEnd() && !isNewLine(this.peek())) {
-            token += this.advance();
+            this.advance();
         }
     }
 
@@ -124,7 +122,7 @@ class Lexer {
             finalCol = initialCol + MAX_INT_LEN - 1;
         }
 
-        this.addToken(token, "nInt", initialCol, finalCols);
+        this.addToken(token, "nInt", initialCol, finalCol);
     }
 
     handleWord(firstChar, initialCol) {
@@ -143,7 +141,11 @@ class Lexer {
         }
 
         const tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
-        this.addToken(token, tokenType, initialCol, finalCols);
+        this.addToken(token, tokenType, initialCol, finalCol);
+    }
+
+    getTokenType(token) {
+        return TOKEN_TYPES[token] ?? 'inválido'
     }
 }
 
