@@ -17,9 +17,9 @@
     <textarea id="code-input"></textarea>
 
     <button onclick="callLexicalAnalysis('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
-    <button onclick="callSintaticAnalysis('token-output', 'error-output', 'code-input')">Analíse Sintática</button>
+    <button onclick="callSyntaticAnalysis('token-output', 'error-output', 'code-input')">Analíse Sintática</button>
     <button onclick="compilar()">Compilar</button>
-    
+
     <table id="token-output">
         <tr>
             <th>Lexema</th>
@@ -56,7 +56,7 @@
     <script src="js/checkers.js"></script>
     <script src="js/inputOutput.js"></script>
     <script src="js/lexicalAnalyzer.js"></script>
-    <script src="js/sintaticAnalyzer.js"></script>
+    <script src="js/syntaticAnalyzer.js"></script>
     <script src="js/tokens.js"></script>
 </body>
 </html>
