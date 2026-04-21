@@ -1,174 +1,155 @@
-function updateError(state, token, errorType, initialCol, finalCol) {
-    state.error.token = token;
-    state.error.errorType = errorType;
-    state.error.line = state.line;
-    state.error.initialCol = initialCol;
-    state.error.finalCol = finalCol;
-    state.errorFound = true;
+const { isValidElement } = require("react");
 
-    console.log(state.error)
-    tableError(state.error)
-}
+class Lexer {
+    constructor(input) {
+        this.input = input;
+        this.pos = 0;
+        this.line = 1;
+        this.lineStart = 0;
+        this.tokens = [];
+        this.errors = [];
+    }
 
-function updateOutput(output, token, tokenType, line, initialCol, finalCol, tokenList) {
-    output.token = token;
-    output.tokenType = tokenType;
-    output.line = line;
-    output.initialCol = initialCol;
-    output.finalCol = finalCol;
+    get currentCol() {
+        return this.pos - this.lineStart + 1;
+    }
 
-    tokenList.push({ token, tokenType, line, initialCol, finalCol });
+    isAtEnd() {
+        return this.pos >= this.input.length;
+    }
 
-    console.log(output)
-    tableOutput(output)
-}
+    peek(offset = 0) {
+        if (this.pos + offset >= this.input.length) return '\0';
+        return this.input[this.pos + offset];
+    }
 
-function updateLine(state, i) {
-    state.line++;
-    state.offset = i + 1;
+    advance() {
+        const char = this.input[this.pos++];
 
-    return state;
-}
+        if (typeof isNewLine === 'function' && isNewLine(char)) {
+            this.line++;
+            this.lineStart = this.pos;
+        }
+        return char;
+    }
 
-function updateCol(i, offset) {
-    return i - offset + 1;
-}
+    reportError(token, errorType, initialCol, finalCol) {
+        const error = { token, errorType, line: this.line, initialCol, finalCol }
+        this.errors.push(error);
 
-function getTokenType(token) {
-    return TOKEN_TYPES[token] ?? 'inválido';
-}
+        console.error(error);
+        if (typeof tableError === 'function') tableError(error);
+    }
 
-function commentHandler(input, i, state) {
-    let firstChar = input[i];
-    let secondChar = input[i + 1];
+    addToken(token, tokenType, initialCol, finalCol) {
+        const output = { token, tokenType, line: this.line, initialCol, finalCol }
+        this.tokens.push(output);
 
-    if (firstChar === '{') {
-        const commentOppened = i;
-        while (i < input.length && input[i] !== '}') {
-            
-            if (isNewLine(input[i])) state = updateLine(state, i);
-            i++;
+        console.error(output);
+        if (typeof tableOutput === 'function') tableOutput(error);
+    }
+
+    lex() {
+        while (!this.isAtEnd()) {
+            const initialCol = this.currentCol;
+            const char = this.advance();
+
+            if (isSpace(char) || isNewLine(char)) continue;
+
+            if (char === '{') {
+                this.handleBlockComment(initialCol);
+                continue;
+            }
+
+            if (char === '/' && this.peek() === '/') {
+                this.handleLineComment(char, initialCol);
+                continue;
+            }
+
+            if (isDigit(char)) {
+                this.handleNumber(char, initialCol);
+                continue;
+            }
+
+            if (isLetter(char)) {
+                this.handleWord(char, initialCol);
+                continue;
+            }
+
+            if (isTwoCharToken(char, this.peek())) {
+                const token = char + this.advance();
+                this.addToken(token, getTokenType(token), initialCol, this.currentCol - 1);
+                continue;
+            }
+
+            const tokenType = getTokenType(char);
+            if (tokenType === 'inválido') {
+                this.reportError(char, "alfabeto-nao-identificado", initialCol, initialCol);
+            } else {
+                this.addToken(char, tokenType, initialCol, initialCol);
+            }
+        }
+        
+        return { tokenList: this.tokens, erros: this.errors, errorsFound: this.errors.length};
+    }
+
+    handleBlockComment(initialCol) {
+        while (!this.isAtEnd() && this.peek() != '}') {
+            this.advance();
         }
 
-        if (i === input.length){
-            updateError(state, "",`comentario-nao-finalizado`, commentOppened, commentOppened);
+        if (this.isAtEnd()) {
+            this.reportError("", "comentario-nao-finalizado", initialCol, initialCol);
+        } else {
+            this.advance();
+        }
+    }
+
+    handleLineComment() {
+        while (!this.isAtEnd() && !isNewLine(this.peek())) {
+            token += this.advance();
+        }
+    }
+
+    handleNumber(firstChar, initialCol) {
+        let token = firstChar;
+
+        while (!this.isAtEnd() && isDigit(this.peek())) {
+            token += this.advance();
         }
 
-        if (isNewLine(input[i])) state = updateLine(state, i);
-        i++;
+        let finalCol = this.currentCol - 1;
 
-    } else if (firstChar === '/' && secondChar === '/') {
-        while (i < input.length && !isNewLine(input[i])) i++;
-        state = updateLine(state, i);
-    }
-    return i;
-}
+        if (token.length > MAX_INT_LEN) {
+            this.reportError(token, "numero-longo", initialCol, finalCol);
+            token = token.substring(0, MAX_INT_LEN);
+            finalCol = initialCol + MAX_INT_LEN - 1;
+        }
 
-function numberHandler(input, startIndex, state) {
-    let i = startIndex;
-
-    while (i < input.length && isDigit(input[i])) i++;
-
-    let token = input.substring(startIndex, i);
-
-    let finalIndex = i - 1;
-
-    if (token.length > MAX_INT_LEN) {
-        updateError(state, token, "numero-longo", updateCol(startIndex, state.offset), updateCol(i - 1, state.offset));
-        token = token.substring(0, MAX_INT_LEN);
-        finalIndex = startIndex  + MAX_INT_LEN;
+        this.addToken(token, "nInt", initialCol, finalCols);
     }
 
-    return { token, finalIndex, tokenType: "nint" , i: i - 1};
-}
+    handleWord(firstChar, initialCol) {
+        let token = firstChar;
 
-function wordHandler(input, startIndex, state) {
-    let i = startIndex;
+        while (!this.isAtEnd() && isVocabulary(this.peek())) {
+            token += this.advance();
+        }
 
-    while (i < input.length && isVocabulary(input[i])) i++;
+        let finalCol = this.currentCol - 1;
 
-    let token = input.substring(startIndex, i);
+        if (token.length > MAX_LEN) {
+            this.reportError(token, "identificador-longo", initialCol, finalCol);
+            token = token.substring(0, MAX_LEN);
+            finalCol = initialCol + MAX_LEN - 1;
+        }
 
-    let tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
-    
-    let finalIndex = i - 1
-
-    if (token.length > MAX_LEN) {
-        updateError(state, token, "identificador-longo", updateCol(startIndex, state.offset), updateCol(i - 1, state.offset));
-        token = token.substring(0, MAX_LEN);
-        finalIndex = startIndex + MAX_LEN;
+        const tokenType = TOKEN_TYPES[token] ?? isValidIdentifier(token);
+        this.addToken(token, tokenType, initialCol, finalCols);
     }
-
-    return { token, finalIndex: finalIndex, tokenType, i: i - 1 };
-}
-
-function tokenHandler(input, startIndex, state, handler, output, tokenList) {
-    const { token, finalIndex, tokenType, i } = handler(input, startIndex, state);
-    const initialCol = updateCol(startIndex, state.offset);
-    const finalCol = updateCol(finalIndex, state.offset);
-    updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
-    return i;
-}
-
-function twoCharHandler(token, i, state, initialCol, finalCol, output, tokenList) {
-    const tokenType = getTokenType(token);
-    i++;
-    finalCol = updateCol(i, state.offset)
-    updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
-    return i;
 }
 
 function lexicalAnalysis(input) {
-    let state = {
-        line: 1,
-        offset: 0,
-        error: {},
-        errorFound: false
-    };
-
-    let output = {};
-    const tokenList = [];
-
-    for (let i = 0; i < input.length; i++) {
-
-        const initialCol = updateCol(i, state.offset);
-        let finalCol = initialCol;
-        const char = input[i]
-        
-        if (isSpace(char)) continue;
-        if (isNewLine(char)) {
-            state = updateLine(state, i);
-            continue;
-        }
-
-        if (isCommentOpener(char, input[i + 1])) {
-            i = commentHandler(input, i, state);
-            continue;
-        }
-        
-        if (isDigit(char)) {
-            i = tokenHandler(input, i, state, numberHandler, output, tokenList);
-            continue;
-        }
-        
-        if (isLetter(char)) {
-            i = tokenHandler(input, i, state, wordHandler, output, tokenList);
-            continue;
-        }
-        
-        if (isTwoCharToken(char, input[i + 1])) {
-            let token = input[i] + input[i + 1];
-            i = twoCharHandler(token, i, state, initialCol,finalCol, output, tokenList);
-            continue;
-        }
-
-        let token = char;
-        let tokenType = getTokenType(token);
-        finalCol = updateCol(i, state.offset);
-
-        if (tokenType === 'inválido') updateError(state, token, "alfabeto-nao-identificado", initialCol, finalCol);
-        else updateOutput(output, token, tokenType, state.line, initialCol, finalCol, tokenList);
-    }
-
-    return { tokenList, errorFound: state.errorFound };
+    const lexer = new Lexer(input);
+    return lexer.lex();
 }
