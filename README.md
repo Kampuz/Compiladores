@@ -13,3 +13,6 @@ Trabalho:
 - [x] Analisador Léxico de tokens simples {[0-9], +, -, *, /, ., (,)} onde devem ser indentificados {nInt, nReal, opSoma, opSub, opMult, opDiv, aP, fP}
 - [x] Analisador Léxico para LALG
 - [x] Rotinas para tratamento de erros léxicos
+- [x] Analisador Sintático
+- [] Tratador de erros sintáticos
+- [] frontend
