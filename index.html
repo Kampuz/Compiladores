@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,55 +7,68 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button onclick="goTo('calculadora.html')">Calculadora</button><br>
+    <header clas="toolbar">
+        <button onclick="goTo('calculadora.html')">Calculadora</button>
+        <button onclick="cleanInput()">Novo</button>
+        
+        <button onclick="openFile('file-input')">Abrir</button>
+        <button onclick="saveFile('code-input')">Salvar</button>
+        
+        <button onclick="compile('code-input', 'token-output', 'error-output', 'sintaticalErrorOutput', 'sintaticalErrorTable')">Compilar</button>
+    </header>
+    <main>
+
+        <input type="file" id="file-input" hidden accept=".txt">
+        <textarea id="code-input" placeholder="Digite seu código aqui..." rows="15" cols="80"></textarea>
+        
+        <section class="ouputs">
+            <h3>Tabela de Tokens</h3>
+            <table id="token-output", border="1">
+                <thead>
+                    <tr>
+                        <th>Lexema</th>
+                        <th>Token</th>
+                        <th>Linha</th>
+                        <th>Coluna Inicial</th>
+                        <th>Coluna Final</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <h3>Erros Léxicos</h3>
+            <table id="error-output" border="1">
+                <thead>
+
+                    <tr>
+                        <th>Erro</th>
+                        <th>Token</th>
+                        <th>Linha</th>
+                        <th>Coluna Inicial</th>
+                        <th>Coluna Final</th>
+                    </tr> 
+                </thead>
+            </table>
     
-    <button onclick="cleanInput()">Novo</button>
-    <button onclick="openFile('file-input', 'code-input')">Abrir</button>
-    <button onclick="saveFile('code-input')">Salvar</button>
+            <h3>Erros Sintáticos</h3>
+            <table id="sintaticalErrorTable" border="1">
+                <thead>
+                    <tr>
+                        <th>Esperado</th>
+                        <th>Encontrado</th>
+                         <th>Tipo</th>
+                        <th>Linha</th>
+                        <th>Coluna</th>
+                    </tr>
+                </thead> 
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
     
-    <input type="file" id="file-input" class="input" hidden accept=".txt">
-    <textarea id="code-input"></textarea>
-
-    <button onclick="callLexicalAnalysis('token-output', 'error-output', 'code-input')">Analíse Léxica</button>
-    <button onclick="callSyntaticAnalysis('token-output', 'error-output', 'code-input')">Analíse Sintática</button>
-    <button onclick="compilar()">Compilar</button>
-
-    <table id="token-output">
-        <tr>
-            <th>Lexema</th>
-            <th>Token</th>
-            <th>Linha</th>
-            <th>Coluna Inicial</th>
-            <th>Coluna Final</th>
-        </tr>
-    </table>
-
-    <table id="error-output">
-        <tr>
-            <th>Erro</th>
-            <th>Token</th>
-            <th>Linha</th>
-            <th>Coluna Inicial</th>
-            <th>Coluna Final</th>
-        </tr>
-    </table>
-
-    <table id="sintaticalErrorTable">
-        <thead>
-            <tr>
-                <th>Esperado</th>
-                <th>Encontrado</th>
-                <th>Tipo</th>
-                <th>Linha</th>
-                <th>Coluna</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
     <script src="js/checkers.js"></script>
     <script src="js/compileLogic.js"></script>
-    <script src="js/foleHandlers.js"></script>
+    <script src="js/fileHandlers.js"></script>
     <script src="js/lexicalAnalyzer.js"></script>
     <script src="js/syntaticAnalyzer.js"></script>
     <script src="js/tokens.js"></script>

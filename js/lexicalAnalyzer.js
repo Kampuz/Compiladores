@@ -1,5 +1,3 @@
-const { isValidElement } = require("react");
-
 class Lexer {
     constructor(input) {
         this.input = input;
