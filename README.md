@@ -27,6 +27,7 @@ Trabalho:
 - [] frontend
 
 Bugs:
+
 - [] valor '-' na tabela de simbolos
 - [] tudo 'e passado como valor na tabela de simbolos
 - escopo do procedimento vira procedimento_x e nao procedimento_nomeProcedimento
