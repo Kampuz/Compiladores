@@ -1,45 +1,285 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 20px;
+/* ============================================================================
+   1. Variáveis Globais e Reset
+   ============================================================================ */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --radius: 8px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "Fira Code", Consolas, Monaco, "Courier New", monospace;
 }
 
-textarea {
-    width: 100%;
-    height: 150px;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    resize: vertical;
+* {
     box-sizing: border-box;
-    margin-bottom: 10px;
+    margin: 0;
+    padding: 0;
 }
 
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    padding: 24px;
+    line-height: 1.5;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* ============================================================================
+   2. Cabeçalho, Toolbar e Navegação
+   ============================================================================ */
+header.toolbar {
+    background: var(--card-bg);
+    padding: 16px 20px 0 20px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+/* Estilo Geral dos Botões */
 button {
-    background: #2d7ef7;
-    color: white;
-    border: none;
-    padding: 8px 16px;
+    font-family: var(--font-sans);
     font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-main);
     cursor: pointer;
-    margin-bottom: 15px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button:hover {
-    background: #1c5fd1;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
-#token-output, #error-output, #sintaticalErrorTable {
-    font-family: monospace;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 10px;
-    white-space: pre-wrap;
-    max-height: 300px;
-    overflow-y: auto;
+button:active {
+    transform: translateY(1px);
+}
+
+/* Destaque para o botão principal de compilar */
+button[onclick*="compile"] {
+    background: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+button[onclick*="compile"]:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+/* Aba e Barra de Navegação */
+.tab-nav {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    color: var(--text-muted);
+    padding: 10px 18px;
+    font-weight: 500;
+    border-radius: var(--radius) var(--radius) 0 0;
+    margin-bottom: -1px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+    background: #f1f5f9;
+}
+
+.tab-btn.active {
+    background: var(--card-bg);
+    color: var(--primary-color);
+    border-color: var(--border-color);
+    border-bottom-color: var(--card-bg);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   3. Área Principal e Conteúdo das Abas
+   ============================================================================ */
+main {
+    background: var(--card-bg);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-md);
+    min-height: 480px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.15s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    margin-top: 20px;
+}
+
+.tab-content > h3:first-child {
+    margin-top: 0;
+}
+
+/* Editor de Código (Textarea) */
+textarea#code-input {
+    width: 100%;
+    height: 380px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 14px;
+    background-color: #0f172a;
+    color: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    tab-size: 4;
+}
+
+textarea#code-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+textarea#code-input::placeholder {
+    color: #64748b;
+}
+
+/* ============================================================================
+   4. Estilização Completa das Tabelas
+   ============================================================================ */
+.tab-content {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 13px;
+    text-align: left;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+table thead {
+    background-color: #f8fafc;
+    border-bottom: 2px solid var(--border-color);
+}
+
+table th {
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+
+table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+}
+
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Estilização para Tabelas de Erro */
+#error-output, 
+#sintaticalErrorTable, 
+#semanticErrorTable {
+    border-color: #fca5a5;
+}
+
+#error-output thead, 
+#sintaticalErrorTable thead, 
+#semanticErrorTable thead {
+    background-color: #fef2f2;
+}
+
+#error-output th, 
+#sintaticalErrorTable th, 
+#semanticErrorTable th {
+    color: #991b1b;
+}
+
+#error-output td, 
+#sintaticalErrorTable td, 
+#semanticErrorTable td {
+    color: #b91c1c;
+}
+
+/* Barra de Rolagem */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

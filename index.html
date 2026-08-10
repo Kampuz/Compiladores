@@ -3,27 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compiladores</title>
+    <title>Trabalho Compiladores</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header clas="toolbar">
-        <button onclick="goTo('calculadora.html')">Calculadora</button>
-        <button onclick="cleanInput()">Novo</button>
-        
-        <button onclick="openFile('file-input')">Abrir</button>
-        <button onclick="saveFile('code-input')">Salvar</button>
-        
-        <button onclick="compile('code-input', 'token-output', 'error-output', 'sintaticalErrorOutput', 'sintaticalErrorTable')">Compilar</button>
+    <header class="toolbar">
+        <div class="actions">
+            <button onclick="cleanInput()">Novo</button>
+            <button onclick="openFile('file-input')">Abrir</button>
+            <button onclick="saveFile('code-input')">Salvar</button>
+            
+            <button onclick="compile('code-input')">Compilar</button>
+            <input type="file" id="file-input" hidden accept=".txt">
+        </div>
+
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('tab-editor', event)">Editor</button>
+            <button class="tab-btn" onclick="switchTab('tab-lexica', event)">Análise Léxica</button>
+            <button class="tab-btn" onclick="switchTab('tab-simbolos', event)">Tabela de Símbolos</button>
+            <button class="tab-btn" onclick="switchTab('tab-sintatica', event)">Análise Sintática</button>
+            <button class="tab-btn" onclick="switchTab('tab-semantica', event)">Análise Semântica</button>
+        </nav>
     </header>
     <main>
-
-        <input type="file" id="file-input" hidden accept=".txt">
-        <textarea id="code-input" placeholder="Digite seu código aqui..." rows="15" cols="80"></textarea>
+        <section id="tab-editor" class="tab-content active">
+            <h3>Editor de Código Fonte</h3>
+            <textarea id="code-input" placeholder="Digite seu código aqui..." rows="18"></textarea>
+        </section>
         
-        <section class="ouputs">
+        <section id="tab-lexica" class="tab-content">
             <h3>Tabela de Tokens</h3>
-            <table id="token-output", border="1">
+            <table id="token-output" border="1">
                 <thead>
                     <tr>
                         <th>Lexema</th>
@@ -48,42 +58,103 @@
                         <th>Coluna Final</th>
                     </tr> 
                 </thead>
+                <tbody></tbody>
             </table>
-    
-            <h3>Pilha Sintática</h3>
+            </section>
+
+           <!-- 3. ABA TABELA DE SÍMBOLOS -->
+        <section id="tab-simbolos" class="tab-content">
+            <h3>Tabela de Símbolos</h3>
+            <table id="symbolTable" border="1">
+                <thead>
+                    <tr>
+                        <th>Símbolo</th>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th>Passada como</th>
+                        <th>Usada</th>
+                        <th>Nível Léxico</th>
+                        <th>Escopo</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- 4. ABA ANÁLISE SINTÁTICA -->
+        <section id="tab-sintatica" class="tab-content">
+            <h3>Passos da Análise Sintática / Pilha</h3>
             <table id="sintaticalTable" border="1">
                 <thead>
                     <tr>
-                        <th>Acao</th>
+                        <th>Ação</th>
                         <th>Token Atual</th>
-                         <th>Pilha</th>
-                    </tr>
-                </thead> 
+                        <th>Pilha</th>
+                    </tr> 
+                </thead>
                 <tbody></tbody>
             </table>
-
+            
             <h3>Erros Sintáticos</h3>
             <table id="sintaticalErrorTable" border="1">
                 <thead>
                     <tr>
                         <th>Esperado</th>
                         <th>Encontrado</th>
-                         <th>Tipo</th>
+                        <th>Tipo</th>
                         <th>Linha</th>
                         <th>Coluna</th>
                     </tr>
-                </thead> 
+                </thead>
                 <tbody></tbody>
             </table>
         </section>
+
+        <!-- 5. ABA ANÁLISE SEMÂNTICA -->
+        <section id="tab-semantica" class="tab-content">
+            <h3>Tabela de Tokens</h3>
+            <table id="token-output" border="1">
+                <thead>
+                    <tr>
+                        <th>Lexema</th>
+                        <th>Token</th>
+                        <th>Linha</th>
+                        <th>Coluna Inicial</th>
+                        <th>Coluna Final</th>
+                        <th>Símbolo</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <h3>Erros Semânticos</h3>
+            <table id="semanticErrorTable" border="1">
+                <thead>
+                    <tr>
+                        <th>Mensagem</th>
+                        <th>Token</th>
+                        <th>Linha</th>
+                        <th>Coluna</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+        <section id="tab-geracao" class="tab-content">
+            <button onclick="generateCode()">Gerar Código</button>
+        </section>
     </main>
-    
+
+    <!-- Scripts do Compilador -->
+    <script src="js/tokens.js"></script>
     <script src="js/checkers.js"></script>
-    <script src="js/compileLogic.js"></script>
-    <script src="js/fileHandlers.js"></script>
     <script src="js/lexicalAnalyzer.js"></script>
     <script src="js/syntaticAnalyzer.js"></script>
-    <script src="js/tokens.js"></script>
+    <script src="js/symbols.js"></script>
+    <script src="js/semanticalAnalyzer.js"></script>
+    <script src="js/compileLogic.js"></script>
+    <script src="js/fileHandlers.js"></script>
     <script src="js/ui.js"></script>
 </body>
 </html>
