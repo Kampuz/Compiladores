@@ -41,11 +41,11 @@ function isValidIdentifier(token) {
 }
 
 function isRelacao(token) {
-    return ['operacao-igual', 'operacao-diferente', 'operacao-maior', 'operacao-maior-igual', 'operacao-menor', 'operacao-menor-igual'].includes(token.tokenType);
+    return ['operacao-igualdade', 'operacao-diferente', 'operacao-maior', 'operacao-maior-igual', 'operacao-menor', 'operacao-menor-igual'].includes(token.tokenType);
 }
 
 function isSimpleOperator(token) {
-    return ['operacao-adicao', 'operacao-subtracao', 'operacao-or'].includes(token.tokenType);
+    return ['operacao-adicao', 'operacao-subtracao', 'operacao-inclusiva'].includes(token.tokenType);
 }
 
 function isPredeclared(tokenType) {
