@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiladores</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button onclick="goTo('index.html')">Voltar</button><br>
+
+    <button onclick="cleanInput()">Novo</button>
+    <button onclick="openFile('file-input', 'code-input')">Abrir</button>
+    <button onclick="saveFile('code-input')">Salvar</button>
+    
+    <input type="file" id="file-input" class="input" hidden accept=".txt">
+    
+    <textarea id="code-input"></textarea>
+
+    <button onclick="calculadora()">Calculadora</button>
+    <button onclick="cleanInput()">Limpar</button>
+
+    <table id="token-output">
+        <tr>
+            <th>Lexema</th>
+            <th>Token</th>
+            <th>Linha</th>
+            <th>Coluna Inicial</th>
+            <th>Coluna Final</th>
+        </tr>
+    </table>
+
+    <script src="js/compileLogic.js"></script>
+    <script src="js/fileHandlers.js"></script>
+    <script src="./calculadora.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>
