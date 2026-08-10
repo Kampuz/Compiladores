@@ -14,7 +14,7 @@ function cleanOutput(idArray) {
         if (tbody) {
             tbody.innerHTML = '';
         } else {
-            while (table.rows.lenght > 1) {
+            while (table.rows.length > 1) {
                 table.deleteRow(1);
             }
         }
@@ -46,3 +46,81 @@ function tableError(error) {
 function goTo(url) {
     window.location.href = url;
 }
+
+function switchTab(tabId, event) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        if (event) event.currentTarget.classList.add('active');
+    }
+
+    // Função para Renderizar Resultados nas Tabelas
+    function renderResults() {
+        const compilationData = JSON.parse(sessionStorage.getItem('compilationResult'));
+        if (!compilationData) return;
+
+        // 1. Limpa todas as tabelas
+        ['#token-output', '#error-output', '#symbolTable', '#semanticErrorTable']
+            .forEach(sel => {
+                const tbody = document.querySelector(`${sel} tbody`);
+                if (tbody) tbody.innerHTML = '';
+            });
+
+        // 2. Renderiza a Tabela de Símbolos diretamente na DOM
+        const tokenTbody = document.querySelector('#token-output tbody');
+        if (compilationData.tokenList && tokenTbody) {
+            compilationData.tokenList.forEach(token => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${token.token}</td>
+                    <td>${token.tokenType}</td>
+                    <td>${token.line}</td>
+                    <td>${token.initialCol}</td>
+                    <td>${token.finalCol}</td>
+                `;
+                tokenTbody.appendChild(tr);
+            });
+        }
+
+        const symbolTbody = document.querySelector('#symbolTable tbody');
+        if (compilationData.symbols && symbolTbody) {
+            compilationData.symbols.forEach(sym => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${sym.name || '-'}</td>
+                    <td>${sym.type || '-'}</td>
+                    <td>${sym.category || '-'}</td>
+                    <td>${sym.value !== undefined ? sym.value : '-'}</td>
+                    <td>${sym.isRef ? 'Referência (var)' : 'Valor'}</td>
+                    <td>${sym.used ? 'Sim' : 'Não'}</td>
+                    <td>${sym.level || 0}</td>
+                    <td>${sym.scope || 'global'}</td>
+                `;
+                symbolTbody.appendChild(tr);
+            });
+        }
+
+        const semanticTbody = document.querySelector('#semanticErrorTable tbody');
+        if (compilationData.semanticErrors && semanticTbody) {
+            compilationData.semanticErrors.forEach(err => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${err.message || ''}</td>
+                    <td>${err.token || ''}</td>
+                    <td>${err.line || 0}</td>
+                    <td>${err.column || 0}</td>
+                `;
+                semanticTbody.appendChild(tr);
+            });
+        }
+    }
+
+    // Sobrescreve o clique do botão Compilar para renderizar automaticamente
+    const originalCompile = window.compile;
+    window.compile = function(...args) {
+        if (typeof originalCompile === 'function') {
+            originalCompile(...args);
+        }
+        renderResults();
+    };
