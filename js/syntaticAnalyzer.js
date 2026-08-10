@@ -3,6 +3,7 @@ class Parser {
         this.tokens = tokenList;
         this.pos = 0;
         this.stack = [];
+        this.errors = [];
     }
 
     peek(offset = 0) {
@@ -50,6 +51,8 @@ class Parser {
             line: found.line,
             initialCol: found.initialCol
         };
+
+        this.errors.push(errorData);
 
         if (typeof sintaticalErrorTable === 'function') {
             sintaticalErrorTable(errorData);
@@ -109,7 +112,7 @@ class Parser {
         this.enterRule('<bloco>');
         const type = this.peek().tokenType;
 
-        if (type === 'tipo-inteiro' || type === 'tipo-boolean') {
+        if (type === 'palavra-reservada-var') {
             this.parteDeclaracoesVariaveis();
         }
 
@@ -123,6 +126,7 @@ class Parser {
 
     parteDeclaracoesVariaveis() {
         this.enterRule('<parte de declarações de variáveis>');
+        this.eat('palavra-reservada-var');
         this.declaracoesVariaveis();
 
         while (this.peek().tokenType === 'ponto-vírgula' && (this.peek(1).tokenType === 'tipo-inteiro' || this.peek(1).tokenType === 'tipo-boolean')) {
@@ -221,7 +225,7 @@ class Parser {
     comando() {
         this.enterRule('<comando>');
         const type = this.peek().tokenType;
-        if (type === 'identificador-válido') this.atribuicaoOuChamada();
+        if (type === 'identificador-válido' || (typeof isPredeclared === 'function' && isPredeclared(type))) this.atribuicaoOuChamada();
         else if (type === 'palavra-reservada-begin') this.comandoComposto();
         else if (type === 'palavra-reservada-if') this.comandoCondicional1();
         else if (type === 'palavra-reservada-while') this.comandoRepetitivo1();
@@ -325,7 +329,7 @@ class Parser {
         this.enterRule('<termo>');
         this.fator();
         let type = this.peek().tokenType;
-        while (type === 'operacao-multiplicacao' || type === 'operacao-divisao' || type === 'operacao-and') {
+        while (type === 'operacao-multiplicacao' || type === 'operacao-divisao' || type === 'operacao-conjuncao') {
             this.eat(type);
             this.fator();
             type = this.peek().tokenType;
@@ -344,8 +348,8 @@ class Parser {
             this.eat('abre-parenteses');
             this.expressao();
             this.eat('fecha-parenteses');
-        } else if (type === 'palavra-reservada-negacao') {
-            this.eat('palavra-reservada-negacao');
+        } else if (type === 'operacao-negacao') {
+            this.eat('operacao-negacao');
             this.fator();
         } else {
             this.reportError('fator', this.peek());
@@ -418,5 +422,6 @@ function sintaticalErrorTable(error) {
 // Wrapper to match your original function signature
 function syntaticalAnalysis(tokenList) {
     const parser = new Parser(tokenList);
-    parser.parse();
+    const success = parser.parse();
+    return { success, errors: parser.errors, errorsFound: parser.errors.length };
 }
