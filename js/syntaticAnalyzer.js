@@ -54,8 +54,8 @@ class Parser {
 
         this.errors.push(errorData);
 
-        if (typeof sintaticalErrorTable === 'function') {
-            sintaticalErrorTable(errorData);
+        if (typeof sintaticErrorTable === 'function') {
+            sintaticErrorTable(errorData);
         }
     }
 
@@ -69,7 +69,7 @@ class Parser {
     }
 
     logStackStep(action) {
-        const tableBody = document.querySelector('#sintaticalTable tbody');
+        const tableBody = document.querySelector('#sintaticTable tbody');
         if (!tableBody) return;
 
         const currentToken = this.peek().token || 'EOF';
@@ -404,8 +404,8 @@ class Parser {
     }
 }
 
-function sintaticalErrorTable(error) {
-    const tableBody = document.querySelector('#sintaticalErrorTable tbody');
+function sintaticErrorTable(error) {
+    const tableBody = document.querySelector('#sintaticErrorTable tbody');
     if (!tableBody) return
 
     const row = document.createElement('tr');

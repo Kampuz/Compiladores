@@ -70,5 +70,5 @@ function processTokens(input) {
         output += `${token}  ${tokenType}  ${line}  ${col_inicial}  ${col_final}<br>`;
     }
     
-    document.getElementById('token-output').innerHTML = output;
+    document.getElementById('lexicTable').innerHTML = output;
 }

@@ -1,7 +1,7 @@
 function compile(inputId) {
 
     console.log("--- Limpando Tabelas Antigas ---");
-    cleanOutput(['token-output', 'error-output', 'symbolTable', 'semanticErrorTable', 'sintaticalErrorTable', 'sintaticalTable']);
+    cleanOutput(['lexicTable', 'lexicErrorTable', 'symbolTable', 'semanticErrorTable', 'sintaticErrorTable', 'sintaticTable']);
     console.log("--- Tabelas Limpas ---");
 
     const codeInput = document.getElementById(inputId);
@@ -49,19 +49,65 @@ function compile(inputId) {
     const { errors: semanticErrors, symbols } = semanticalAnalysis(tokenList);
     console.log("--- Análise Semântica Concluída ---");
 
+    let generatedCodeText = null;
+    let codeGenError = null;
+
+    if (!semanticErrors || semanticErrors.length === 0) {
+        console.log("--- Iniciando Geração de Código ---");
+        if (typeof codeGeneration === 'function') {
+            const genResult = codeGeneration(tokenList);
+            if (genResult.success) {
+                generatedCodeText = genResult.codeText;
+            } else {
+                codeGenError = genResult.error;
+                console.warn(`Geração de código interrompida: ${codeGenError}`);
+            }
+        } else {
+            console.warn("codeGeneration.js não carregado - pulando geração de código.");
+        }
+        console.log("--- Geração de Código Concluída ---");
+    }
+
     const compilationData = {
         tokenList,
         lexicalErrors,
         syntaxErrors,
         semanticErrors,
-        symbols
+        symbols,
+        generatedCodeText,
+        codeGenError
     };
 
     sessionStorage.setItem('compilationResult', JSON.stringify(compilationData));
     
     if (semanticErrors && semanticErrors.length > 0) {
         alert(`Compilação concluída com ${semanticErrors.length} erro(s) semântico(s). Navegue pelas abas para conferir.`);
+    } else if (codeGenError) {
+        alert(`Análise concluída sem erros, mas a geração de código falhou: ${codeGenError}`);
     } else {
         alert("Compilação concluída com sucesso! Nenhum erro encontrado.");
     }
+}
+
+function generateCode() {
+    const raw = sessionStorage.getItem('compilationResult');
+    if (!raw) {
+        alert("Compile o código primeiro (ava Editor) antes de gerar o código-alvo.");
+        return;
+    }
+
+    const compilationData = JSON.parse(raw);
+    const output = document.getElementById('code-output');
+
+    if (compilationData.codeGenError) {
+        if (output) output.value = `Erro na geração de código:\n${compilationData.codeGenError}`;
+        return;
+    }
+
+    if (!compilationData.generatedCodeText) {
+        if (output) output.value = 'Nenhum código gerado ainda. Corrija os erros e compile novamente.';
+        return;
+    }
+
+    if (output) output.value = compilationData.generatedCodeText;
 }

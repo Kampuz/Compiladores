@@ -241,26 +241,26 @@ table tbody tr:hover {
 }
 
 /* Estilização para Tabelas de Erro */
-#error-output, 
-#sintaticalErrorTable, 
+#lexicErrorTable, 
+#sintaticErrorTable, 
 #semanticErrorTable {
     border-color: #fca5a5;
 }
 
-#error-output thead, 
-#sintaticalErrorTable thead, 
+#lexicErrorTable thead, 
+#sintaticErrorTable thead, 
 #semanticErrorTable thead {
     background-color: #fef2f2;
 }
 
-#error-output th, 
-#sintaticalErrorTable th, 
+#lexicErrorTable th, 
+#sintaticErrorTable th, 
 #semanticErrorTable th {
     color: #991b1b;
 }
 
-#error-output td, 
-#sintaticalErrorTable td, 
+#lexicErrorTable td, 
+#sintaticErrorTable td, 
 #semanticErrorTable td {
     color: #b91c1c;
 }
