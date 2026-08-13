@@ -22,7 +22,8 @@ function compile(inputId) {
            lexicalErrors,
            syntaxErrors: [],
            semanticErrors: [],
-           symbols: []
+           symbols: [],
+           generatedCodeText : null
         }));
         alert(`Análise concluída com ${lexicalErrorsFound} erro(s) léxico(s). Navegue pelas abas para verificar.`);
         return;
@@ -39,7 +40,8 @@ function compile(inputId) {
             lexicalErrors,
             syntaxErrors,
             semanticErrors: [],
-            symbols: []
+            symbols: [],
+            generatedCodeText : null
         }));
         alert(`Análise concluída com ${syntaxErrorsFound} erro(s) sintático(s). Navegue pelas abas para verificar.`);
         return;
@@ -50,20 +52,18 @@ function compile(inputId) {
     console.log("--- Análise Semântica Concluída ---");
 
     let generatedCodeText = null;
+    let generatedCodeVector = null;
     let codeGenError = null;
 
     if (!semanticErrors || semanticErrors.length === 0) {
         console.log("--- Iniciando Geração de Código ---");
-        if (typeof codeGeneration === 'function') {
-            const genResult = codeGeneration(tokenList);
-            if (genResult.success) {
-                generatedCodeText = genResult.codeText;
-            } else {
-                codeGenError = genResult.error;
-                console.warn(`Geração de código interrompida: ${codeGenError}`);
-            }
+        const genResult = codeGeneration(tokenList);
+        if (genResult.success) {
+            generatedCodeText = genResult.codeText;
+            generatedCodeVector = genResult.codeVector;
         } else {
-            console.warn("codeGeneration.js não carregado - pulando geração de código.");
+            codeGenError = genResult.error;
+            console.warn(`Geração de código interrompida: ${codeGenError}`);
         }
         console.log("--- Geração de Código Concluída ---");
     }
@@ -75,6 +75,7 @@ function compile(inputId) {
         semanticErrors,
         symbols,
         generatedCodeText,
+        generatedCodeVector,
         codeGenError
     };
 
