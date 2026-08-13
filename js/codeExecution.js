@@ -1,24 +1,41 @@
+function textToVector(text) {
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const vector = [];
+
+    for (const line of lines) {
+        const match = line.match(/^(?:\d+:\s*)?([A-Z]+)(?:\s(-?\d+))?\s*$/);
+        if (!match) {
+            throw new Error(`Linha de código de máquina inválida: "${line}"`);
+        }
+
+        const [, op, argStr] = match;
+        vector.push({ op: op.toUpperCase(), arg: argStr !== undefined ? parseInt(argStr, 10) : null});
+    }
+
+    return vector;
+}
+
 function executeCode() {
-    const raw = sessionStorage.getItem('compilationResult');
-    if (!raw) {
-        alert("Compile o código primeiro antes de executar.");
+
+    const codeInput = document.getElementById('code-output');
+    const executionOutput = document.getElementById('execution-output');
+    let compilationResult;
+    
+    const text = codeInput ? codeInput.value.trim() : '';
+
+    if (!text) {
+        alert("Nenhum código para executar. Compile ou carregue um arquivo primeiro.")
         return;
     }
 
-
-    const compilationData = JSON.parse(raw);
-    const output = document.getElementById('execution-output');
-
-    if (compilationData.codeGenError) {
-        if (output) output.value = `Não é possível executar: houve um erro na geração de código.\n${compilationData.codeGenError}`;
+    let generatedCodeVector;
+    try {
+        generatedCodeVector = textToVector(text);
+    } catch (err) {
+        if (executionOutput) executionOutput.value = `Erro ao interpretar o código de máquina:\n${err.message}`;
         return;
     }
-
-    if (!compilationData.generatedCodeVector || compilationData.generatedCodeVector.length === 0) {
-        if (output) output.value = 'Nenhim código gerado ainda. Corrija os erros e compile novamente';
-        return;
-    }
-
+    
     const outputLines = [];
 
     const wm = new CodeGenerator({
@@ -38,15 +55,15 @@ function executeCode() {
         }
     });
 
-    wm.code_vector = compilationData.generatedCodeVector;
+    wm.code_vector = generatedCodeVector;
 
-    if (output) output.value = 'Executando...';
+    if (executionOutput) executionOutput.value = 'Executando...';
 
     try {
-        wm.interpretar();
-        output.value = outputLines.length > 0 ? outputLines.join('') : '(Programa executado com sucesso, mas não produziu nenhuma saída.)';
+        wm.interpret();
+        executionOutput.value = outputLines.length > 0 ? outputLines.join('') + '\nExecução encerrada com sucesso' : '(Programa executado com sucesso, mas não produziu nenhuma saída.)';
     } catch (error) {
         console.error(error);
-        output.value = `Erro durante a execução:\n${error.message}\n\n--- Saída até o momento ---\n${outputLines.join('')}`;
+        executionOutput.value = `Erro durante a execução:\n${error.message}\n\n--- Saída até o momento ---\n${outputLines.join('')}`;
     }
 }
