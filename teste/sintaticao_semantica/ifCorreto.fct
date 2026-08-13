@@ -1,0 +1,26 @@
+program ifCorreto;
+ 
+ var  a, b, c : int;
+        d, e, f : real;
+        g : boolean;
+
+procedure funcao1(var param : real);
+   begin
+      param := 0.5
+    end; 
+
+
+begin  
+    if (a > 0) and (g or b > 0) then 		// IF correto
+        write (a)				// Neste caso apenas um comando, se fossem mais, seria necessario utilizar begin/end
+    else				//Opcional
+       write (d);
+
+    if (a > 0) then			//Caso IF com 3 comandos internos. Utilizando begin/end
+       begin
+            d := e*3.0;
+            e := f/4.0 + d%2.0;
+            while a > 0 do
+                 a := a - 1
+       end 
+end.

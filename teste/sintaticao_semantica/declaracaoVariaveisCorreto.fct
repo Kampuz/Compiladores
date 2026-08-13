@@ -1,0 +1,11 @@
+program declaracaoVariaveis;
+var a, b, c : int;
+      d, e, f  : real;
+      g         : boolean;
+
+begin
+     b := 1;
+     c := 1;
+     a := b + c;
+     write(a)
+end.

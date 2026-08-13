@@ -1,0 +1,14 @@
+{
+Comentario com multiplas linhas
+}
+
+
+//Comentario de uma 
+linha unica (Errado)
+
+program comentarioErrado;
+   var a : int;
+
+begin
+   write(a)
+end.

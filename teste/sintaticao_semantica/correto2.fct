@@ -1,0 +1,23 @@
+
+
+
+program correto;
+   var a,b,c,d : real;
+          e : int;
+
+begin
+   a:=b;
+   b:=10.0%10.5*2.5;
+   c:=11.2;
+
+   if (a > 0.0) then 
+      begin
+         while( a > 0.0) and (b < 3.2)  do
+           b:=a;
+         if(a < 2.0) then
+           begin
+               a := 0.5
+           end
+      end
+ 
+end.

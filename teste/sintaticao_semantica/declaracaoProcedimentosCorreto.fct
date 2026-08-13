@@ -1,0 +1,21 @@
+program decProcedimentos;
+var a : real;
+procedure funcao1();
+   var d, b : int;
+   begin
+      d := b
+    end;
+
+procedure funcao2(var param1: int; param2 : real);                         //Parametros podem ser declarados com tipos diferentes sem var
+  begin
+     param1 := 1;
+     param2 := 0.5
+  end;
+
+
+begin
+  read(a);
+  funcao1(); 
+  funcao2(1, 2.1);
+  a := 2.0
+end.

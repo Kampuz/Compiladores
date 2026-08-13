@@ -1,0 +1,15 @@
+//Testando todos
+
+{
+Comentario com multiplas linhas
+}
+
+//Teste
+
+
+program comentarioCorreto;
+   var a : int;
+
+begin
+   write(a)
+end.

@@ -1,0 +1,38 @@
+program decProcedimentos;
+
+ procedure funcao1( );
+      var a, b : int;                              //Declaracao de variaveis
+      begin		
+         a := b
+      end;
+
+ procedure funcao2(var param1: int, param2 : real);              //Falta begin e end
+       a := b
+
+ procedure funcao3 (param1; param2 : int);                        
+     begin
+         param1 := param2
+     end;
+
+ procedure funcao4( var param1, param2, param3: real);
+     begin
+         param1 := param2 + param3
+     end;
+
+ procedure funcao5(param1: boolean; param2 : int);
+     var a : real;
+         b : int;
+     begin
+         if param then
+            read (a)
+        else
+            read(b)
+     end;
+
+begin
+    funcao1();
+    funcao2(2, 3.5);
+    funcao3(a, b);
+    funcao4(c, d, e);
+    funcao5(true, 2)
+end.

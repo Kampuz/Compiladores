@@ -1,0 +1,4 @@
+program atribuicaoCorreto;
+begin
+  a = 2.3
+end.

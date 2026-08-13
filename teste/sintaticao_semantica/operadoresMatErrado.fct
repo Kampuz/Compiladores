@@ -1,0 +1,8 @@
+program operadores;
+   var res : real;
+         a : int;
+
+begin
+  res := (2+3) div 2.0 + 6 mod 5 + 2* (2 a);
+  write(a)
+end.

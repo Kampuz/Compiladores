@@ -1,0 +1,25 @@
+program ifCorreto;
+
+   var  a, b, c : int;       //Declaracao de variaveis. E necessario utilizar a  Reservada_Var.
+          d, e, f : real;      //Pode ser declarada uma lista de variaveis.
+          g : boolean;     //Ou uma so variavel
+
+   procedure funcao1(var param : real);
+      begin
+           param := 0
+      end; 
+
+  begin
+     if (a > 0) and (b > 0)             //If Errado falta a palavra then
+        write (a)
+     else
+        write (d);
+
+     if (a > 0) then                      //if errado, dois comandos sem utilizar a begin/end
+       d := e*3;
+       e := f/4 + d%2
+    else
+       c := 3;
+
+       
+  end.

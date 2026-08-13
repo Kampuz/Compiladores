@@ -1,0 +1,14 @@
+program atribuicaoCorreto;
+int a;
+begin
+a := 1;
+if (a < 3) then
+begin
+ if(a > 0) then
+    begin
+       write(a)
+    end;
+  a := 2
+end;
+  write(a)
+end.

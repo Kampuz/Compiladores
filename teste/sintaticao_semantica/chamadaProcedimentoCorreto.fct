@@ -1,0 +1,9 @@
+program chamadaProcedimento;
+var a1, a22, _1a : real;
+      b : boolean;
+
+begin
+  
+  read (b);
+  write (_1a)
+end.
