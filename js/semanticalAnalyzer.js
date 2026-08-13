@@ -115,7 +115,6 @@ class SemanticAnalyzer {
 
     areTypesCompatible(target, source) {
         if (target === source) return true;
-        if (target === 'real' && source === 'integer') return true;
         return false;
     }
 
@@ -441,7 +440,7 @@ class SemanticAnalyzer {
             this.consume(this.currentToken().tokenType || this.currentToken().type);
             const rightType = this.expressaoSimples();
 
-            const numeric = ['integer', 'real'];
+            const numeric = ['integer'];
             if (numeric.includes(leftType) && numeric.includes(rightType)) {
                 return 'boolean';
             }
@@ -456,40 +455,97 @@ class SemanticAnalyzer {
     }
 
     expressaoSimples() {
-        let leftType = this.termo();
+    let hasUnary = false;
 
-        while (this.match('operacao-adicao', 'operacao-subtracao')) {
-            this.consume(this.currentToken().tokenType || this.currentToken().type);
-            const rightType = this.termo();
-
-            if (leftType === 'boolean' || rightType === 'boolean') {
-                throw new SemanticError(`Operação aditiva não é permitida com tipos booleanos`);
-            }
-
-            leftType = (leftType === 'real' || rightType === 'real') ? 'real' : 'integer';
-        }
-
-        return leftType;
+    // 1. Trata sinal unário (+ | -)
+    if (this.match('operacao-adicao', 'operacao-subtracao', '+', '-')) {
+        hasUnary = true;
+        const unaryToken = this.currentToken();
+        this.consume(unaryToken.tokenType || unaryToken.type);
     }
 
-    termo() {
-        let leftType = this.fator();
+    // 2. Primeiro termo
+    let leftType = this.termo();
 
-        while (this.match('operacao-multiplicacao', 'operacao-divisao')) {
-            this.consume(this.currentToken().tokenType || this.currentToken().type);
-            const rightType = this.fator();
+    if (hasUnary && leftType === 'boolean') {
+        throw new SemanticError(`Operador unário não pode ser aplicado a tipos booleanos`, this.currentToken());
+    }
 
-            if (leftType === 'boolean' || rightType === 'boolean') {
-                throw new SemanticError(`Operação multiplicativa não é permitida com tipos booleanos`);
+    // 3. Adicionado 'operacao-inclusiva' e 'palavra-reservada-or' na verificação
+    while (this.match(
+        'operacao-adicao', 'operacao-subtracao', 'operacao-or', 
+        'operacao-inclusiva', 'palavra-reservada-or', '+', '-', 'or'
+    )) {
+        const token = this.currentToken();
+        const opType = token.tokenType || token.type;
+        const opVal = String(token.value || token.token || '').toLowerCase();
+        
+        this.consume(opType);
+
+        const rightType = this.termo();
+
+        // Checa se o operador atual é o 'or'
+        if (opType === 'operacao-or' || opType === 'operacao-inclusiva' || opVal === 'or') {
+            if (leftType !== 'boolean' || rightType !== 'boolean') {
+                throw new SemanticError(`Operador 'or' exige operandos do tipo boolean`, token);
             }
-
-            leftType = (leftType === 'real' || rightType === 'real') ? 'real' : 'integer';
+            leftType = 'boolean';
+        } else {
+            if (leftType === 'boolean' || rightType === 'boolean') {
+                throw new SemanticError(`Operação aditiva não é permitida com tipos booleanos`, token);
+            }
+            leftType = 'integer';
         }
+    }
 
-        return leftType;
+    return leftType;
+}
+
+    termo() {
+    let leftType = this.fator();
+
+    // Regra 19 da LALG: <termo> ::= <fator> {(* | div | and) <fator>}
+    while (
+        this.match('operacao-multiplicacao', 'operacao-divisao', 'operacao-conjuncao')
+    ) {
+        const token = this.currentToken();
+        const opType = token.tokenType || token.type;
+        const tokenValue = String(token.value || token.token || '').toLowerCase();
+        
+        this.consume(opType);
+
+        const rightType = this.fator();
+
+        // Trata o operador lógico 'and'
+        if (opType === 'operacao-conjuncao' || tokenValue === 'and') {
+            if (leftType !== 'boolean' || rightType !== 'boolean') {
+                throw new SemanticError(`Operador 'and' exige operandos do tipo 'boolean'`, token);
+            }
+            leftType = 'boolean';
+        } else {
+            // Trata 'mult' e 'div'
+            if (leftType === 'boolean' || rightType === 'boolean') {
+                throw new SemanticError(`Operações de multiplicação/divisão não são permitidas com tipos booleanos`, token);
+            }
+            leftType = 'integer';
+        }
+    }
+
+    return leftType;
     }
 
     fator() {
+        if (this.match('palavra-reservada-not', 'not')) {
+            const token = this.consume(this.currentToken().tokenType || this.currentToken().type);
+            const subType = this.fator(); // Chamada recursiva para avaliar o fator negado
+
+            if (subType !== 'boolean') {
+                throw new SemanticError(`Operador 'not' só pode ser aplicado a expressões do tipo 'boolean'`, token);
+            }
+
+            return 'boolean';
+        }
+
         if (this.match('identificador-válido')) {
             const token = this.consume('identificador-válido');
             const name = token.token || token.value;
@@ -504,15 +560,15 @@ class SemanticAnalyzer {
             sym.used = true;
             return sym.type;
         } 
+
+        if (this.match('boolean', 'valor-true', 'valor-false')) {
+            this.consume(this.currentToken().tokenType || this.currentToken().type);
+            return 'boolean';
+        }
         
         if (this.match('nInt', 'numero-inteiro')) {
             this.consume(this.currentToken().tokenType || this.currentToken().type);
             return 'integer';
-        } 
-        
-        if (this.match('nReal', 'numero-real')) {
-            this.consume(this.currentToken().tokenType || this.currentToken().type);
-            return 'real';
         } 
         
         if (this.match('abre-parenteses')) {
