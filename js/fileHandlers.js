@@ -20,6 +20,7 @@ function loadFile(fileInputId, codeInputId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadFile('file-input', 'code-input');
+    loadFile('file-input-output', 'code-output')
 })
 
 function saveFile(inputId) {
