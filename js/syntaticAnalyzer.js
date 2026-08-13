@@ -86,7 +86,6 @@ class Parser {
         tableBody.appendChild(row);
     }
 
-
     parse() {
         try {
             this.programa();
@@ -110,13 +109,13 @@ class Parser {
 
     bloco() {
         this.enterRule('<bloco>');
-        const type = this.peek().tokenType;
+        const nextTokenType = this.peek().tokenType;
 
-        if (type === 'palavra-reservada-var') {
+        if (isType(nextTokenType)) {
             this.parteDeclaracoesVariaveis();
         }
 
-        if (this.peek().tokenType === 'palavra-reservada-procedure') {
+        if (nextTokenType === 'palavra-reservada-procedure') {
             this.parteDeclaracoesSubRotinas();
         }
 
@@ -126,10 +125,9 @@ class Parser {
 
     parteDeclaracoesVariaveis() {
         this.enterRule('<parte de declarações de variáveis>');
-        this.eat('palavra-reservada-var');
         this.declaracoesVariaveis();
 
-        while (this.peek().tokenType === 'ponto-vírgula' && (this.peek(1).tokenType === 'tipo-inteiro' || this.peek(1).tokenType === 'tipo-boolean')) {
+        while (this.peek().tokenType === 'ponto-vírgula' && isType(this.peek(1).tokenType)) {
             this.eat('ponto-vírgula');
             this.declaracoesVariaveis();
         }
@@ -146,9 +144,9 @@ class Parser {
 
     tipo() {
         this.enterRule('<tipo>');
-        const type = this.peek().tokenType;
-        if (type === 'tipo-inteiro' || type === 'tipo-boolean') {
-            this.eat(type);
+        const nextTokenType = this.peek().tokenType;
+        if (isType(nextTokenType)) {
+            this.eat(nextTokenType);
         } else {
             this.reportError('tipo', this.peek());
             this.pos++;
@@ -224,11 +222,11 @@ class Parser {
 
     comando() {
         this.enterRule('<comando>');
-        const type = this.peek().tokenType;
-        if (type === 'identificador-válido' || (typeof isPredeclared === 'function' && isPredeclared(type))) this.atribuicaoOuChamada();
-        else if (type === 'palavra-reservada-begin') this.comandoComposto();
-        else if (type === 'palavra-reservada-if') this.comandoCondicional1();
-        else if (type === 'palavra-reservada-while') this.comandoRepetitivo1();
+        const nextTokenType = this.peek().tokenType;
+        if (nextTokenType === 'identificador-válido' || isPredeclared(nextTokenType)) this.atribuicaoOuChamada();
+        else if (nextTokenType === 'palavra-reservada-begin') this.comandoComposto();
+        else if (nextTokenType === 'palavra-reservada-if') this.comandoCondicional1();
+        else if (nextTokenType === 'palavra-reservada-while') this.comandoRepetitivo1();
         else {
             this.reportError('comando', this.peek())
             this.pos++
@@ -239,12 +237,12 @@ class Parser {
     atribuicaoOuChamada() {
         this.enterRule('<atribuição ou chamada>');
         this.variavel();
-        const type = this.peek().tokenType;
+        const nextTokenType = this.peek().tokenType;
         
-        if (type === 'atribuicao') {
+        if (nextTokenType === 'atribuicao') {
             this.eat('atribuicao');
             this.expressao();
-        } else if (type === 'abre-parenteses') {
+        } else if (nextTokenType === 'abre-parenteses') {
             this.eat('abre-parenteses');
             if (this.peek().tokenType !== 'fecha-parenteses') {
                 this.listaExpressoes();
@@ -311,16 +309,17 @@ class Parser {
 
     expressaoSimples() {
         this.enterRule('<expressão simples>');
-        let type = this.peek();
-        if (typeof isSimpleOperator === 'function' && isSimpleOperator(type)) {
-            this.eat(type.tokenType);
+        let currentToken = this.peek();
+        if (isSimpleOperator(currentToken)) {
+            this.eat(currentToken.tokenType);
         }
 
         this.termo();
-
-        while (typeof isSimpleOperator === 'function' && isSimpleOperator(this.peek())) {
-            this.eat(this.peek().tokenType);  
+        currentToken = this.peek()
+        while (isSimpleOperator(currentToken) || currentToken.tokenType === 'operacao-inclusiva') {
+            this.eat(currentToken.tokenType);  
             this.termo();
+            currentToken = this.peek();
         }
         this.exitRule();
     }
@@ -328,27 +327,28 @@ class Parser {
     termo() {
         this.enterRule('<termo>');
         this.fator();
-        let type = this.peek().tokenType;
-        while (type === 'operacao-multiplicacao' || type === 'operacao-divisao' || type === 'operacao-conjuncao') {
-            this.eat(type);
+        let nextTokenType = this.peek().tokenType;
+        while (nextTokenType === 'operacao-multiplicacao' || nextTokenType === 'operacao-divisao' || nextTokenType === 'operacao-conjuncao') {
+            this.eat(nextTokenType);
             this.fator();
-            type = this.peek().tokenType;
+            nextTokenType = this.peek().tokenType;
         }
         this.exitRule();
     }
 
     fator() {
         this.enterRule('<fator>');
-        const type = this.peek().tokenType;
-        if (type === 'identificador-válido') {
+        const nextTokenType = this.peek().tokenType;
+
+        if (nextTokenType === 'identificador-válido') {
             this.variavel();
-        } else if (type === 'nInt' || type === 'valor-true' || type === 'valor-false') {
-            this.eat(type);
-        } else if (type === 'abre-parenteses') {
+        } else if (nextTokenType === 'nInt' || nextTokenType === 'valor-true' || nextTokenType === 'valor-false') {
+            this.eat(nextTokenType);
+        } else if (nextTokenType === 'abre-parenteses') {
             this.eat('abre-parenteses');
             this.expressao();
             this.eat('fecha-parenteses');
-        } else if (type === 'operacao-negacao') {
+        } else if (nextTokenType === 'operacao-negacao') {
             this.eat('operacao-negacao');
             this.fator();
         } else {
@@ -379,6 +379,12 @@ class Parser {
         this.exitRule();
     }
 
+    numero() {
+        this.enterRule('<numero>');
+        this.eat('nInt');
+        this.exitRule();
+    }
+
     digito() {
         this.enterRule('<digito>');
         this.eat('digito');
@@ -397,11 +403,6 @@ class Parser {
         this.exitRule();
     }
 
-    numero() {
-        this.enterRule('<numero>');
-        this.eat('nInt');
-        this.exitRule();
-    }
 }
 
 function sintaticErrorTable(error) {
