@@ -105,14 +105,6 @@ class CodeGenerator {
                 }
                 this.top_pile--;
                 break;
-            case 'CMME':
-                if (D[this.top_pile - 1] < D[this.top_pile]) {
-                    D[this.top_pile - 1] = 1;
-                } else {
-                    D[this.top_pile - 1] = 0;
-                }
-                this.top_pile--;
-                break;
             case 'CMMA':
                 if (D[this.top_pile - 1] > D[this.top_pile]) {
                     D[this.top_pile - 1] = 1;
@@ -164,22 +156,22 @@ class CodeGenerator {
 
             case 'LEIT':
                 this.top_pile++;
-                D[this.top_pile] = input();
+                D[this.top_pile] = this.input();
                 break;
             case 'LECH':
                 this.top_pile++;
-                D[this.top_pile] = inputChar();
+                D[this.top_pile] = this.inputChar();
                 break;
             case 'IMPR':
-                output(D[this.top_pile]);
+                this.output(D[this.top_pile]);
                 this.top_pile--;
                 break;
             case 'IMPC':
-                outputChar(D[this.top_pile]);
+                this.outputChar(D[this.top_pile]);
                 this.top_pile--;
                 break;
             case 'IMPE':
-                output('\n');
+                this.output('\n');
                 break;
 
             // Programa
