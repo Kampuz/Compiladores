@@ -8,15 +8,7 @@
 </head>
 <body>
     <header class="toolbar">
-        <div class="actions">
-            <button onclick="cleanInput()">Novo</button>
-            <button onclick="openFile('file-input')">Abrir</button>
-            <button onclick="saveFile('code-input')">Salvar</button>
-            
-            <button onclick="compile('code-input')">Compilar</button>
-            <input type="file" id="file-input" hidden accept=".txt">
-        </div>
-
+        
         <nav class="tab-nav">
             <button class="tab-btn active" onclick="switchTab('tab-editor', event)">Editor</button>
             <button class="tab-btn" onclick="switchTab('tab-lexica', event)">Análise Léxica</button>
@@ -28,6 +20,14 @@
     </header>
     <main>
         <section id="tab-editor" class="tab-content active">
+            <div class="actions">
+                <button onclick="cleanInput()">Novo</button>
+                <button onclick="openFile('file-input')">Abrir</button>
+                <button onclick="saveFile('code-input')">Salvar</button>
+                
+                <button onclick="compile('code-input')">Compilar</button>
+                <input type="file" id="file-input" hidden>
+            </div>
             <h3>Editor de Código Fonte</h3>
             <textarea id="code-input" placeholder="Digite seu código aqui..." rows="18"></textarea>
         </section>
@@ -147,6 +147,9 @@
             <button onclick="generateCode()">Gerar Código</button>
             <textarea id="code-output" placeholder="Código gerado aparecerá aqui..." rows="18"></textarea>
             <button onclick="saveFile('code-output')">Salvar Código Gerado</button>
+            <h3>Código executado</h3>
+            <button onclick="executeCode()">Executar</button>
+            <textarea id="execution-output" placeholder="A saída do programa aparecerá aqui..." rows="10" readonly></textarea>
         </section>
     </main>
 
