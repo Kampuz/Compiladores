@@ -57,7 +57,6 @@ class CodeGenerationVisitor {
     tokenTypeToDataType(tokenType) {
         switch (tokenType) {
             case 'tipo-inteiro': return 'integer';
-            case 'tipo-real': return 'real';
             case 'tipo-boolean': return 'boolean';
             default: throw new Error(`Tipo de token desconhecido: ${tokenType}`);
         }
@@ -85,7 +84,7 @@ class CodeGenerationVisitor {
     }
 
     bloco() {
-        if (this.match('palavra-reservada-var')) {
+        if (this.match('tipo-inteiro', 'tipo-boolean')) {
             this.secaoDeclaracaoVariaveis();
         }
         if (this.match('palavra-reservada-procedure')) {
@@ -95,9 +94,8 @@ class CodeGenerationVisitor {
     }
 
     secaoDeclaracaoVariaveis() {
-        this.consume('palavra-reservada-var');
         let total = 0;
-        while (this.match('tipo-inteiro', 'tipo-real', 'tipo-boolean')) {
+        while (this.match('tipo-inteiro', 'tipo-boolean')) {
             total += this.declaracaoVariaveis();
         }
         if (total > 0) this.gen.gerar('AMEM', total);
