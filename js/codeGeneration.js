@@ -23,8 +23,8 @@ class CodeGenerationVisitor {
     }
 
     type() {
-        const t = this.currentToken();
-        return t ? (t.tokenType || t.type) : 'EOF';
+        const token = this.currentToken();
+        return token ? (token.tokenType || token.type) : 'EOF';
     }
 
     match(...types) {
@@ -66,9 +66,18 @@ class CodeGenerationVisitor {
         try {
             this.programa();
             this.gen.gerar('PARA', null);
-            return { success: true, code: this.gen.code_vector, gen: this.gen };
+            return {
+                success: true,
+                code: this.gen.code_vector,
+                gen: this.gen
+            };
         } catch (error) {
-            return { success: false, error: error.message, code: this.gen.code_vector, gen: this.gen };
+            return {
+                success: false,
+                error: error.message,
+                code: this.gen.code_vector,
+                gen: this.gen
+            };
         }
     }
 
@@ -243,7 +252,7 @@ class CodeGenerationVisitor {
             'operacao-maior-igual': 'CMDG',
             'operacao-menor-igual': 'CMEG',
             'operacao-igualdade': 'CMIG',
-            'operacao-diferente': 'CMIG', // seguido de NEGA abaixo
+            'operacao-diferente': 'CMIG',
         };
 
         if (this.match(...Object.keys(relMap))) {
@@ -325,10 +334,6 @@ class CodeGenerationVisitor {
     }
 }
 
-/**
- * Wrapper com a mesma convenção de retorno das outras fases
- * (lexicalAnalysis, syntaticalAnalysis, semanticalAnalysis).
- */
 function codeGeneration(tokenList) {
     const visitor = new CodeGenerationVisitor(tokenList);
     const result = visitor.generate();
