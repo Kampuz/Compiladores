@@ -94,20 +94,18 @@ class SemanticAnalyzer {
     }
 
     consumeTypeToken() {
-        if (this.match('tipo-inteiro', 'tipo-real', 'tipo-boolean')) {
+        if (this.match('tipo-inteiro', 'tipo-boolean')) {
             const t = this.currentToken();
             this.index++;
             return t;
         }
-        throw new SemanticError('Esperado tipo válido (int, real ou boolean)', this.currentToken());
+        throw new SemanticError('Esperado tipo válido (int ou boolean)', this.currentToken());
     }
 
     tokenTypeToDataType(tokenType) {
         switch (tokenType) {
             case 'tipo-inteiro':
                 return 'integer';
-            case 'tipo-real':
-                return 'real';
             case 'tipo-boolean':
                 return 'boolean';
             default:
@@ -151,7 +149,7 @@ class SemanticAnalyzer {
     }
 
     bloco() {
-        if (this.match('palavra-reservada-var')) {
+        if (this.match('tipo-inteiro', 'tipo-boolean')) {
             this.secaoDeclaracaoVariaveis();
         }
         while (this.match('palavra-reservada-procedure')) {
@@ -161,8 +159,7 @@ class SemanticAnalyzer {
     }
 
     secaoDeclaracaoVariaveis() {
-        this.consume('palavra-reservada-var');
-        while (this.match('tipo-inteiro', 'tipo-real', 'tipo-boolean')) {
+        while (this.match('tipo-inteiro', 'tipo-boolean')) {
             this.declaracaoVariaveis();
         }
     }
@@ -440,7 +437,7 @@ class SemanticAnalyzer {
     expressao() {
         let leftType = this.expressaoSimples();
 
-        if (this.match('operacao-maior', 'operacao-menor', 'operacao-igual', 'operacao-diferente', 'operacao-maior-igual', 'operacao-menor-igual', 'operador-relacional')) {
+        if (this.match('operacao-maior', 'operacao-menor', 'operacao-igualdade', 'operacao-diferente', 'operacao-maior-igual', 'operacao-menor-igual')) {
             this.consume(this.currentToken().tokenType || this.currentToken().type);
             const rightType = this.expressaoSimples();
 
@@ -461,7 +458,7 @@ class SemanticAnalyzer {
     expressaoSimples() {
         let leftType = this.termo();
 
-        while (this.match('operacao-adicao', 'operacao-subtracao', 'operador-aditivo')) {
+        while (this.match('operacao-adicao', 'operacao-subtracao')) {
             this.consume(this.currentToken().tokenType || this.currentToken().type);
             const rightType = this.termo();
 
@@ -478,7 +475,7 @@ class SemanticAnalyzer {
     termo() {
         let leftType = this.fator();
 
-        while (this.match('operacao-multiplicacao', 'operacao-divisao', 'operador-multiplicativo')) {
+        while (this.match('operacao-multiplicacao', 'operacao-divisao')) {
             this.consume(this.currentToken().tokenType || this.currentToken().type);
             const rightType = this.fator();
 
