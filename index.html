@@ -145,6 +145,8 @@
         <section id="tab-geracao" class="tab-content">
             <h3>Código Gerado</h3>
             <button onclick="generateCode()">Gerar Código</button>
+            <input type="file" id="file-input-output" style="display:none">
+            <button onclick="openFile('file-input-output')">Abrir</button>
             <textarea id="code-output" placeholder="Código gerado aparecerá aqui..." rows="18"></textarea>
             <button onclick="saveFile('code-output')">Salvar Código Gerado</button>
             <h3>Código executado</h3>
