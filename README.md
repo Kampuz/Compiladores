@@ -20,15 +20,6 @@ Trabalho:
 - [X] Tratador de erros sintáticos
 - [X] Analisador Semantico
 - [X] Tratador de erros semanticos
-- [] Gerador de código intermediário
-- [] Otimizador de código
-- [] Gerador de código
-- [] Programa alvo
-- [] frontend
-
-Bugs:
-
-- [] valor '-' na tabela de simbolos
-- [] tudo 'e passado como valor na tabela de simbolos
-- escopo do procedimento vira procedimento_x e nao procedimento_nomeProcedimento
-- analise semantica nao passo a passo
+- [X] Gerador de código
+- [x] Programa alvo
+- [X] frontend
