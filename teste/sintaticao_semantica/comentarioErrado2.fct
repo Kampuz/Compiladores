@@ -3,7 +3,7 @@ Comentario com multiplas linhas
 
 
 program comentarioErrado;
-   var a : int;
+   int a;
 
 begin
    write(a)

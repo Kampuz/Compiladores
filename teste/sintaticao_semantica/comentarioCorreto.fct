@@ -8,7 +8,7 @@ Comentario com multiplas linhas
 
 
 program comentarioCorreto;
-   var a : int;
+int a;
 
 begin
    write(a)

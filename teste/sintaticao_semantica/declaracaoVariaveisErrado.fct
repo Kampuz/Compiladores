@@ -1,7 +1,7 @@
 program declaracaoVariaveis;
-var a, b, c : int;
-var d, e, f  : real;
-var g         : boolean;
+var int a, b, c;
+var int d, e, f;
+var int g;
 
 begin
      b := 1;

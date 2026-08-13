@@ -1,14 +1,7 @@
 program whileCorreto;
  
- var  a, b, c : int;
-        d, e, f : real;
-        g : boolean;
-
-procedure funcao1(var param : real);
-   begin
-      param := 0.6
-    end; 
-
+ int  a, b, c, d, e, f;
+boolean g;
 
 begin  
     a := 0;

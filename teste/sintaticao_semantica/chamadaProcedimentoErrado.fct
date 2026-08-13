@@ -1,9 +1,9 @@
 program chamadaProcedimento;
-var a1, a22, _1a : real;
-      b : boolean;
+int a1, a22, _1a;
+boolean b;
 
 begin
-  a22 := 2.50;
+  a22 := 2;
   read ();
   write (a22)
 end.

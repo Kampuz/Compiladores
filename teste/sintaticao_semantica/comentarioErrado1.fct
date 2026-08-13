@@ -7,7 +7,7 @@ Comentario com multiplas linhas
 linha unica (Errado)
 
 program comentarioErrado;
-   var a : int;
+int a;
 
 begin
    write(a)

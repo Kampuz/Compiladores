@@ -2,21 +2,20 @@
 
 
 program correto;
-   var a,b,c,d : real;
-          e : int;
+   int a,b,c,d, e;
 
 begin
    a:=b;
-   b:=10.0%10.5*2.5;
-   c:=11.2;
+   b:=10 div 10*2;
+   c:=11;
 
-   if (a > 0.0) then 
+   if (a > 0) then 
       begin
-         while( a > 0.0) and (b < 3.2)  do
+         while((a > 0) and (b < 3))  do
            b:=a;
-         if(a < 2.0) then
+         if(a < 2) then
            begin
-               a := 0.5
+               a := 0
            end
       end
  

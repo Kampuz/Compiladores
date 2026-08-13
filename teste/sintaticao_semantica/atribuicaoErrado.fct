@@ -1,4 +1,5 @@
 program atribuicaoCorreto;
+int a;
 begin
-  a = 2.3
+  a = 2;
 end.
