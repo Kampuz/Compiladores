@@ -1,7 +1,7 @@
 function compile(inputId) {
 
     console.log("--- Limpando Tabelas Antigas ---");
-    cleanOutput(['lexicTable', 'lexicErrorTable', 'symbolTable', 'semanticErrorTable', 'sintaticErrorTable', 'sintaticTable']);
+    cleanOutput(['lexicTable', 'lexicErrorTable', 'symbolTable', 'semanticErrorTable', 'sintaticErrorTable', 'sintaticTable', 'code-output', 'execution-output']);
     console.log("--- Tabelas Limpas ---");
 
     const codeInput = document.getElementById(inputId);
