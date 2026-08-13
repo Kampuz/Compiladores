@@ -39,5 +39,5 @@ const TOKEN_TYPES = {
     ':=': 'atribuicao',
 }
 
-const MAX_LEN = 10
-const MAX_INT_LEN = 10
+const MAX_LEN = 25
+const MAX_INT_LEN = 25
