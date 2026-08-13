@@ -104,18 +104,23 @@ function renderResults() {
     if (compilationData.tokenList && semanticTbody) {
         const symbolNames = new Set((compilationData.symbols || []).map(s => s.name));
         compilationData.tokenList.forEach(token => {
+            const tokenType = token.tokenType || token.type;
             const isIdentifier = token.tokenType === 'identificador-válido';
             const symbolLabel = isIdentifier ? (symbolNames.has(token.token) ? token.token : 'não declarado') : '-';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+            
+            if (isIdentifier) {
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td>${token.token}</td>
                 <td>${token.tokenType}</td>
                 <td>${token.line}</td>
                 <td>${token.initialCol}</td>
                 <td>${token.finalCol}</td>
                 <td>${symbolLabel}</td>
-            `;
-            semanticTbody.appendChild(tr)
+                `;
+                semanticTbody.appendChild(tr)
+            }
         })
     }
 
