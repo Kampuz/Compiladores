@@ -2,29 +2,31 @@ function openFile(fileInputId) {
     document.getElementById(fileInputId).click();
 }
 
-function loadFile(fileInputId, codeOutputId) {
+function loadFile(fileInputId, codeInputId) {
     const fileInput = document.getElementById(fileInputId);
-    const codeOutput = document.getElementById(codeOutputId);
+    const codeInput = document.getElementById(codeInputId);
 
     fileInput.onchange = async (event) => {
         const file = event.target.files[0];
         if (!file) return
 
         try {
-            codeOutput.value = await file.text();
+            codeInput.value = await file.text();
         } catch (err) {
             console.error("Error reading file:", err);
         }
     };
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    loadFile('file-input', 'code-input');
+})
+
 function saveFile(inputId) {
     const text = document.getElementById(inputId).value;
     let filename = prompt("Enter file name:", "file.txt");
 
     if (!filename) return;
-
-    if (!filename.endsWith('.txt')) filename += '.txt'; ;
 
     const blob = new Blob([text], { type: 'text/plain' });
     const link = document.createElement('a');
