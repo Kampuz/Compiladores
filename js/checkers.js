@@ -45,9 +45,13 @@ function isRelacao(token) {
 }
 
 function isSimpleOperator(token) {
-    return ['operacao-adicao', 'operacao-subtracao', 'operacao-inclusiva'].includes(token.tokenType);
+    return ['operacao-adicao', 'operacao-subtracao'].includes(token.tokenType);
 }
 
 function isPredeclared(tokenType) {
     return ['palavra-reservada-read', 'palavra-reservada-write', 'tipo-inteiro', 'tipo-boolean', 'valor-true', 'valor-false'].includes(tokenType);
+}
+
+function isType(token) {
+        return token === 'tipo-inteiro' || token === 'tipo-boolean'
 }
