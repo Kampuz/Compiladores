@@ -192,13 +192,13 @@ class CodeGenerator {
 
 
             default:
-                throw new Error(`Comando desconhecido: ${instruction}`);
+                throw new Error(`Comando desconhecido: "${op}" (instrução completa: ${JSON.stringify(instruction)}`);
             
         }
         
     }
 
-    interpretar() {
+    interpret() {
         while (this.counterIsValid(this.counter) && !this.isEnd(this.code_vector[this.counter])) {
             const instruction = this.code_vector[this.counter];
             const wasJump = this.isJump(instruction);

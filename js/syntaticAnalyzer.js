@@ -292,7 +292,7 @@ class Parser {
         this.expressaoSimples();
         const type = this.peek();
         
-        if (typeof isRelacao === 'function' && isRelacao(type)) {
+        if (typeof isRelation === 'function' && isRelation(type)) {
             this.eat(type.tokenType);
             this.expressaoSimples();
         }

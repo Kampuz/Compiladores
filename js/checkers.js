@@ -40,7 +40,7 @@ function isValidIdentifier(token) {
     return "identificador-válido"
 }
 
-function isRelacao(token) {
+function isRelation(token) {
     return ['operacao-igualdade', 'operacao-diferente', 'operacao-maior', 'operacao-maior-igual', 'operacao-menor', 'operacao-menor-igual'].includes(token.tokenType);
 }
 
